@@ -33,6 +33,8 @@ GLuint programID;
 
 GLint WindowWidth = 600;
 GLint WindowHeight = 600;
+GLint LastWindowWidth = 600;
+GLint LastWindowHeight = 600;
 float t = 0;
 float l = 0;
 float w = WindowWidth;
@@ -40,10 +42,13 @@ float h = WindowHeight;
 float mouse_x = 0;
 float mouse_y = 0;
 
-bool is_menu_view;
-bool is_game_view;
-bool is_options_view;
-bool is_scores_view;
+//vamos ter flags para identificar o que estamos a ver no momento
+bool is_menu_view = true;
+bool is_game_view = false;
+bool is_options_view = false; // talvez numa fase mais avançada poderemos implementar opções para definir a velocidade das peças a cairem, sons e etc
+bool is_scores_view = false;
+bool is_name_view = false;
+
 
 void transferDataToGPUMemory(void) //functio to transfer data for GPU
 {
@@ -105,8 +110,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		int width_mm, height_mm;
 		glfwGetMonitorPhysicalSize(glfwGetPrimaryMonitor(), &width_mm, &height_mm);
 		const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-		glfwSetWindowMonitor(window, NULL, 0, 0, WindowWidth, WindowHeight, 0);
-		glfwSetWindowPos(window, (mode->width - WindowWidth) / 2, (mode->height - WindowHeight) / 2);
+		glfwSetWindowMonitor(window, NULL, (mode->width - LastWindowWidth) / 2, (mode->height - LastWindowHeight) / 2, LastWindowWidth, LastWindowHeight, 0);
 		glViewport(l, t, w, h);
 	}
 	if (key == GLFW_KEY_LEFT_CONTROL || key == GLFW_KEY_RIGHT_CONTROL)
@@ -120,11 +124,16 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 		glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), 0, 0, mode->width, mode->height, mode->refreshRate);
 		glViewport(l, t, w, h);
-
-
 	}
 
 
+}
+
+void character_callback(GLFWwindow* window, unsigned int codepoint)
+{
+	if (is_name_view) { // se estiver na view de escrever o nome então escrevemos o nome
+
+	}
 }
 
 // glfw: whenever the mouse moves, this callback is called
@@ -153,7 +162,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 	}
 }
 
-
+//TODO fazer com que as proporções fiquem iguais caso façamos o resize
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) //para fazer o jogo responsivo
 {
 	t = t*height / (float)WindowHeight;
@@ -161,6 +170,10 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) //para
 	w = w*width / (float)WindowWidth;
 	h = h*height / (float)WindowHeight;
 	glViewport(l, t, w, h);
+	LastWindowHeight = WindowHeight;
+	WindowHeight = h;
+	LastWindowWidth = WindowWidth;
+	WindowWidth = w;
 }
 
 void mainProgram() {
@@ -205,6 +218,8 @@ int main(void)
 	//key input callback
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 	glfwSetKeyCallback(window, key_callback);
+	glfwSetCharCallback(window, character_callback);
+
 	//mouse input callback
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
