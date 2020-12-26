@@ -1,7 +1,7 @@
 // Include standard headers
 #include <stdio.h>
 #include <stdlib.h>
-
+#define GLEW_STATIC
 // Include GLEW
 #include <GL/glew.h>
 
@@ -10,13 +10,13 @@
 GLFWwindow* window;
 
 // GLM header file
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include <glm.hpp>
+#include <gtc/matrix_transform.hpp>
+#include <gtc/type_ptr.hpp>
 using namespace glm;
 
 // shaders header file
-#include <common/shader.cpp>
+#include "shader.cpp"
 
 // Vertex array object (VAO)
 GLuint VertexArrayID;
@@ -30,7 +30,7 @@ GLuint colorbuffer;
 // GLSL program from the shaders
 GLuint programID;
 
-
+int posicao[200];
 GLint WindowWidth = 600;
 GLint WindowHeight = 600;
 GLint LastWindowWidth = 600;
@@ -42,7 +42,6 @@ float h = WindowHeight;
 float mouse_x = 0;
 float mouse_y = 0;
 
-int posicao[200];
 int x = 0;
 int orient = 0;
 int p1 = 0;
@@ -50,7 +49,6 @@ int p2 = 0;
 int p3 = 0;
 int p4 = 0;
 int timer = 0;
-
 //vamos ter flags para identificar o que estamos a ver no momento
 bool is_menu_view = true;
 bool is_game_view = false;
@@ -69,7 +67,6 @@ void transferDataToGPUMemory(void) //functio to transfer data for GPU
 	programID = LoadShaders("shader.vertexshader", "shader.fragmentshader");//load shaders
 
 	//Definition of the vertices
-
 	float var1 = 20.0f;
 	float var2 = -5.0f;
 	GLfloat g_vertex_buffer_data[200 * 6*3];
@@ -122,16 +119,16 @@ void transferDataToGPUMemory(void) //functio to transfer data for GPU
 		g_color_buffer_data[i+1] = 0.0f;
 		g_color_buffer_data[i+2] = 0.0f;
 	}
-	
+
 	// Move vertex data to video memory; specifically to VBO called vertexbuffer
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 
 	// Move color data to video memory; specifically to CBO called colorbuffer
 	glGenBuffers(1, &colorbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
 
 }
 
@@ -514,29 +511,24 @@ bool is_F_down;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	if (key == GLFW_KEY_UP && (action == GLFW_PRESS || action == GLFW_REPEAT)) { // clicar na tecla UP e/ou continuar a clicar
-		//fazer movimentos com as peças
 		andarcima();
 	}
 
 	if (key == GLFW_KEY_DOWN && (action == GLFW_PRESS || action == GLFW_REPEAT)) {// clicar na tecla DOWN e/ou continuar a clicar
-		//fazer movimentos com as peças
 		andarbaixo();
+		
 	}
 
 	if (key == GLFW_KEY_LEFT && (action == GLFW_PRESS || action == GLFW_REPEAT)) {// clicar na tecla LEFT e/ou continuar a clicar
-		//fazer movimentos com as peças
 		andaresquerda();
 	}
 
 	if (key == GLFW_KEY_RIGHT && (action == GLFW_PRESS || action == GLFW_REPEAT)) {// clicar na tecla RIGHT e/ou continuar a clicar
-		//fazer movimentos com as peças
 		andardireita();
 	}
 	if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-		//fazer a peça rodar 
 	}
 	if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-		//fazer a peça rodar
 		rodarclockwise(x);
 	}
 	if (key == GLFW_KEY_ESCAPE && (action == GLFW_PRESS)) {//clicar na tecla ESCAPE para 
@@ -592,6 +584,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 	}
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
 		//if mouse left button clicked
+	
 	}
 }
 
@@ -610,17 +603,19 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) //para
 }
 
 void mainProgram() {
+	// render scene for each frame
 	for (int i = 0;i < 200;i++) {
 		posicao[i] = 0;
 	}
 	x=criarpeca();
-	// render scene for each frame
 	do {
 		glClear(GL_COLOR_BUFFER_BIT);
 		//left top
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		//draw(); //draw function
+			// drawing callback
+
 		draw();
 		// Swap buffers
 		glfwSwapBuffers(window);
@@ -668,7 +663,6 @@ int main(void)
 
 	// transfer my data (vertices, colors, and shaders) to GPU side
 	transferDataToGPUMemory();
-
 
 	GLuint FramebufferName = 0;
 	glGenFramebuffers(1, &FramebufferName);
