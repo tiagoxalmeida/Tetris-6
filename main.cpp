@@ -42,6 +42,7 @@ float h = WindowHeight;
 float mouse_x = 0;
 float mouse_y = 0;
 
+int posicao[200];
 int x = 0;
 int orient = 0;
 int p1 = 0;
