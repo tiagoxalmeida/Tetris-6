@@ -1,7 +1,7 @@
 // Include standard headers
 #include <stdio.h>
 #include <stdlib.h>
-#define GLEW_STATIC
+
 // Include GLEW
 #include <GL/glew.h>
 
@@ -9,14 +9,20 @@
 #include <GLFW/glfw3.h>
 GLFWwindow* window;
 
-// GLM header file
-#include <glm.hpp>
-#include <gtc/matrix_transform.hpp>
-#include <gtc/type_ptr.hpp>
-using namespace glm;
+//definições para o andré
+//#define GLEW_STATIC
+//#include <glm.hpp>
+//#include <gtc/matrix_transform.hpp>
+//#include <gtc/type_ptr.hpp>
+//#include "shader.cpp"
 
-// shaders header file
-#include "shader.cpp"
+//definições para o tiago
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <common/shader.cpp>
+
+using namespace glm;
 
 // Vertex array object (VAO)
 GLuint VertexArrayID;
