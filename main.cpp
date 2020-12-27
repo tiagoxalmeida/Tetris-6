@@ -41,7 +41,7 @@ int linhas = 20;
 int posx = 0;
 int posy = 0;
 //funçoes usadas no main + algumas extra q podem vir a ser uteis.
-int quantos_espaços_linha(int* mapa, int linha) {
+int quantos_espacos_linha(int* mapa, int linha) {
     int c = 0;
     for (int x = 0; x < colunas; x++) {
         if (mapa[linha * colunas + x] == 0) {
@@ -273,7 +273,7 @@ void anda_fila(int* fila, int siz) {
     }
     fila[siz - 1] = rand() % 7 + 1;
 }
-bool inserir_peça(int p, int ang, int* mapa) {//p representa qual das 7 peças será desenhada e o ang representa qual o angulo inicial da peça
+bool inserir_peca(int p, int ang, int* mapa) {//p representa qual das 7 peças será desenhada e o ang representa qual o angulo inicial da peça
     if (p == 1) {
         if (ang == 1 || ang ==3) { //assumi que o angulo 1 é o horizontal
             if (colunas < posx + 4) {
@@ -1190,7 +1190,7 @@ int main()
     int * mapa = (int*)calloc(colunas * linhas, sizeof(int));
     int* teste = create_fila(4);
     int clock = 0;
-    while (inserir_peça(teste[0], (rand() % 4 + 1), mapa)) {
+    while (inserir_peca(teste[0], (rand() % 4 + 1), mapa)) {
         posy = linhas -1;
         printf("\n fila: ");
         for (int i = 0; i < 4; i++) {
