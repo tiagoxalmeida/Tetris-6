@@ -40,7 +40,37 @@ int colunas = 10;
 int linhas = 20;
 int posx = 0;
 int posy = 0;
+int score = 0;
 //funçoes usadas no main + algumas extra q podem vir a ser uteis.
+void pontuaçao(int x) {
+    if (x == 1) {
+        score = score + 80;
+    }
+    if (x == 2) {
+        score = score +20;
+    }
+    if (x == 3) {
+        score = score + 200;
+    }
+    if (x == 4) {
+        score = score + 900;
+    }
+    if (4 < x) {
+        score = score + 500;
+    }
+}
+void remove_andamento(int * mapa) {
+    int q = 0;
+    for (int i = 0; i < linhas * colunas; i++) {
+        if (mapa[i] / 10 == 1) {
+            q++;
+            mapa[i] = 0;
+        }
+        if (q == 4) {
+            break;
+        }
+    }
+}
 int quantos_espacos_linha(int* mapa, int linha) {
     int c = 0;
     for (int x = 0; x < colunas; x++) {
@@ -589,6 +619,13 @@ bool inserir_peca(int p, int ang, int* mapa) {//p representa qual das 7 peças s
         }
     else { return false; }
     }
+void rotacoes(int p, int* mapa, int ang , int lado) {
+    remove_andamento(mapa);
+    if (!inserir_peça(p, ang + lado, mapa)) {
+        remove_andamento(mapa);
+        inserir_peça(p, ang, mapa);
+    }
+}
 int posicao[200];
 GLint WindowWidth = 600;
 GLint WindowHeight = 600;
