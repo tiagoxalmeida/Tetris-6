@@ -620,10 +620,33 @@ bool inserir_peca(int p, int ang, int* mapa) {//p representa qual das 7 peças s
     else { return false; }
     }
 void rotacoes(int p, int* mapa, int ang , int lado) {
-    remove_andamento(mapa);
+    	int cima =0;
+	int baixo =0;
+	remove_andamento(mapa);
+	if(ang + lado == 5){
+	cima =1;
+	ang = 1;
+	lado = 0;
+	}
+	if(ang + lado == 0){
+	baixo =1;
+	ang = 4;
+	lado = 0;
+	}
     if (!inserir_peça(p, ang + lado, mapa)) {
-        remove_andamento(mapa);
-        inserir_peça(p, ang, mapa);
+        if(cima == 1){
+	remove_andamento(mapa);
+	ang =4;
+        inserir_peça(p,ang, mapa);
+	}
+	if(baixo == 1){
+	remove_andamento(mapa);
+	ang =1;
+        inserir_peça(p,ang, mapa);
+	}
+	if(baixo == 0 && cima ==0){
+	remove_andamento(mapa);
+        inserir_peça(p, ang, mapa);}
     }
 }
 int posicao[200];
@@ -1227,7 +1250,8 @@ int main()
     int * mapa = (int*)calloc(colunas * linhas, sizeof(int));
     int* teste = create_fila(4);
     int clock = 0;
-    while (inserir_peca(teste[0], (rand() % 4 + 1), mapa)) {
+    int ang = rand() % 4 + 1;
+    while (inserir_peca(teste[0], (ang), mapa)) {
         posy = linhas -1;
         printf("\n fila: ");
         for (int i = 0; i < 4; i++) {
@@ -1254,7 +1278,8 @@ int main()
                                 i = 0;
                             }
                             anda_fila(teste, 4);
-                            break;
+                            ang =rand() % 4 + 1;
+			    break;
                         }
                     }
                 }
@@ -1262,6 +1287,8 @@ int main()
             
             //if glwpress_right anda_direita and if true posx = posx+1; corri o programa so em cpp entao nao dava para usar os glwpress q o tiago tinha feito
             //if glwpress_left anda_esquerda and if true posx = posx-1;
+	    //if glwpress_a  rotacoes(teste[0], mapa, ang, -1)}
+	    // if glwpress_d rotacoes(teste[0], mapa, ang, +1)
         }
     }
     display_mapa(mapa);
