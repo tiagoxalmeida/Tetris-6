@@ -393,7 +393,7 @@ int main()
 			size = RenderText(LetterShader, "Iniciar", defsText1[0], defsText1[1], defsText1[2], colorText1);
 			sizeText1[0] = size[0];sizeText1[1] = size[1];sizeText1[2] = size[2];sizeText1[3] = size[3];
 		
-			size = RenderText(LetterShader, "Classificações",defsText2[0], defsText2[1], defsText2[2], colorText2);
+			size = RenderText(LetterShader, "ClassificaÃ§Ãµes",defsText2[0], defsText2[1], defsText2[2], colorText2);
 			sizeText2[0] = size[0]; sizeText2[1] = size[1]; sizeText2[2] = size[2]; sizeText2[3] = size[3];
 
 			size = RenderText(LetterShader, "Controlos", defsText3[0], defsText3[1], defsText3[2], colorText3);
@@ -402,7 +402,7 @@ int main()
 			size = RenderText(LetterShader, "Sair", defsText4[0], defsText4[1], defsText4[2], colorText4);
 			sizeText4[0] = size[0]; sizeText4[1] = size[1]; sizeText4[2] = size[2]; sizeText4[3] = size[3];
 
-			RenderText(LetterShader, "Pressiona a tecla f para entrares em ecrã cheio", 0.5f, 40.0f, 0.35f, glm::vec3(0.863f, 0.863f, 0.863f));
+			RenderText(LetterShader, "Pressiona a tecla f para entrares em ecrÃ£ cheio", 0.5f, 40.0f, 0.35f, glm::vec3(0.863f, 0.863f, 0.863f));
 			RenderText(LetterShader, "Made by Turn", 15.0f, 15.0f, 0.3f, glm::vec3(0.3, 0.7f, 0.9f));
 			LetterShader.setBool("isTexture", true);
 			LetterShader.setBool("isTransparency", false);
@@ -438,6 +438,78 @@ int main()
 			float * size;
 			size = RenderText(LetterShader, "Menu", defsText5[0], defsText5[1], defsText5[2], colorText5);
 			sizeText5[0] = size[0]; sizeText5[1] = size[1]; sizeText5[2] = size[2]; sizeText5[3] = size[3];
+			
+			LetterShader.setBool("isTexture", false);
+
+			//array de teste para as peÃ§as
+			int mapa[] = {1,2,3,4,5,6,7,11,12,13,1,2,3,4,5,6,7,0,12,13,1,2,3,4,5,6,7,11,12,13,1,2,3,4,5,6,0,11,12,13,1,2,3,4,5,6,7,11,12,13,1,2,3,4,5,6,7,11,12,13,1,2,3,4,5,6,7,11,12,13,1,0,0,0,0,0,0,11,12,13,1,2,3,4,5,6,7,11,12,13,1,2,3,4,5,6,7,11,12,13,6,7,11,12,13,1,2,3,4,5,6,7,11,12,13,1,2,3,4,5,6,7,11,12,13,1,2,3,4,5,6,7,11,12,13 };
+
+			//definaÃ§Ã£o dos limites do campo
+			renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * 0.09, static_cast<float>(SCR_HEIGHT * 0.2), SCR_POS_X + SCR_WIDTH * 0.10, static_cast<float>(SCR_HEIGHT * 0.8)), glm::vec3(0.0f,0.0f,0.0f));	
+			renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * 0.09, static_cast<float>(SCR_HEIGHT * 0.185), SCR_POS_X + SCR_WIDTH * 0.41, static_cast<float>(SCR_HEIGHT * 0.20)), glm::vec3(0.0f, 0.0f, 0.0f));
+			renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * 0.40, static_cast<float>(SCR_HEIGHT * 0.2), SCR_POS_X + SCR_WIDTH * 0.41, static_cast<float>(SCR_HEIGHT * 0.8)), glm::vec3(0.0f, 0.0f, 0.0f));
+			
+			//posiÃ§Ã£o dinamica
+			float auxx = 0.0;
+			float auxy = 0.0;
+			for (int i = 0;i < (sizeof(mapa)/sizeof(mapa[0]));i++) {
+				if (mapa[i] == 0) {
+					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(0.000, 0.545, 0.545));
+				}
+				if (mapa[i] == 1) {
+					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10+auxx), static_cast<float>(SCR_HEIGHT * (0.2+auxy)), SCR_POS_X + SCR_WIDTH * (0.10+auxx+0.03), static_cast<float>(SCR_HEIGHT * (0.2+auxy+0.03))), glm::vec3(1.0f, 0.0f, 0.0f));
+				}
+				if (mapa[i] == 2) {
+					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(1.0f, 0.0f, 0.0f));
+				}
+				if (mapa[i] == 3) {
+					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(0.0f, 1.0f, 0.0f));
+				}
+				if (mapa[i] == 4) {
+					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(0.0f, 0.0f, 1.0f));
+				}
+				if (mapa[i] == 5) {
+					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(0.5f, 0.5f, 0.0f));
+				}
+				if (mapa[i] == 6) {
+					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(0.5f, 0.0f, 0.5f));
+				}
+				if (mapa[i] == 7) {
+					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(0.0f, 1.5f, 0.5f));
+				}
+				if (mapa[i] == 11) {
+					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(1.0f, 0.0f, 1.0f));
+				}
+				if (mapa[i] == 12) {
+					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(2.0f, 1.0f, 0.0f));
+				}
+				if (mapa[i] == 13) {
+					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(1.0f, 0.0f, 1.0f));
+				}
+				if (mapa[i] == 14) {
+					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(1.0f, 0.0f, 2.0f));
+				}
+				if (mapa[i] == 15) {
+					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(1.0f, 3.0f, 0.0f));
+				}
+				if (mapa[i] == 16) {
+					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(1.0f, 0.9f, 0.8f));
+				}
+				if (mapa[i] == 16) {
+					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(0.0f, 0.3f, 1.0f));
+				}
+				if (mapa[i] == 17) {
+					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(0.0f, 0.8f, 0.0f));
+				}
+				if ((i-9)%10 == 0 && i!=0) {
+					auxy = auxy + 0.03;
+					auxx = 0.0;
+				}
+				else {
+					auxx = auxx + 0.03;
+				}
+
+			}
 		}
 		else if (page == 3) {
 			LetterShader.use();
@@ -445,7 +517,7 @@ int main()
 			LetterShader.setBool("isTexture", true);
 			LetterShader.setMat4("model", model);
 			float * size;
-			size = RenderText(LetterShader, "Melhores Classificações", 0.5f, 0.1f, 0.4f, glm::vec3(1.0f, 1.0f, 1.0f));
+			size = RenderText(LetterShader, "Melhores ClassificaÃ§Ãµes", 0.5f, 0.1f, 0.4f, glm::vec3(1.0f, 1.0f, 1.0f));
 			//primeiro valor
 			size = RenderText(LetterShader, "12000", 0.5f, 0.2f, 0.4f, glm::vec3(1.0f, 1.0f, 1.0f));
 			//Fazer o loop para mostrar os 5 primeiros resultados
@@ -463,9 +535,9 @@ int main()
 			LetterShader.setBool("isTexture", true);
 			RenderText(LetterShader, "Controlos", 0.5, 0.15, 0.7, glm::vec3(1.0f, 1.0f, 1.0f));
 			float *size;
-			size = RenderText(LetterShader, "W, UP - RODAR A PEÇA", 0.5, 0.7, 0.4, glm::vec3(1.0f, 1.0f, 1.0f));
+			size = RenderText(LetterShader, "W, UP - RODAR A PEÃ‡A", 0.5, 0.7, 0.4, glm::vec3(1.0f, 1.0f, 1.0f));
 			float x = size[1];
-			size = RenderText(LetterShader, "A, LEFT, D, RIGHT, S, DOWN - MOVIMENTAR A PEÇA", 0.5, SCR_HEIGHT - (x + 55.0f), 0.4, glm::vec3(1.0f, 1.0f, 1.0f));
+			size = RenderText(LetterShader, "A, LEFT, D, RIGHT, S, DOWN - MOVIMENTAR A PEÃ‡A", 0.5, SCR_HEIGHT - (x + 55.0f), 0.4, glm::vec3(1.0f, 1.0f, 1.0f));
 			x = size[1];
 			size = RenderText(LetterShader, "ENTER - CONFIRMAR", 0.5, SCR_HEIGHT - (x + 55.0f), 0.4, glm::vec3(1.0f, 1.0f, 1.0f));
 			x = size[1];
