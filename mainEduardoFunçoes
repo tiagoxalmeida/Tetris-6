@@ -677,12 +677,41 @@ bool inserir_peça(int p, int ang, int* mapa) {//p representa qual das 7 peças 
     }
     else { return false; }
 }
-void rotacoes(int p, int* mapa, int ang , int lado) {
-    remove_andamento(mapa);
-    if (!inserir_peça(p, ang + lado, mapa)) {
-        remove_andamento(mapa);
-        inserir_peça(p, ang, mapa);
-    }
+bool rotacoes(int p, int* mapa, int ang, int lado) {
+	int cima = 0;
+	int baixo = 0;
+	remove_andamento(mapa);
+	if (ang + lado == 5) {
+		cima = 1;
+		ang = 1;
+		lado = 0;
+	}
+	if (ang + lado == 0) {
+		baixo = 1;
+		ang = 4;
+		lado = 0;
+	}
+	if (!inserir_peca_r(p, ang + lado, mapa)) {
+		if (cima == 1) {
+			printf("d1\n");
+			remove_andamento(mapa);
+			ang = 4;
+			inserir_peca_r(p, ang, mapa);
+		}
+		if (baixo == 1) {
+			printf("d2\n");
+			remove_andamento(mapa);
+			ang = 1;
+			inserir_peca_r(p, ang, mapa);
+		}
+		if (baixo == 0 && cima == 0) {
+			printf("d3\n");
+			remove_andamento(mapa);
+			inserir_peca_r(p, ang, mapa);
+		}
+		return false;
+	}
+	return true;
 }
 bool anda_baixo(int* mapa) {
     int p1 = -1, p2 = -1, p3 = -1, p4 = -1, c = 0;
