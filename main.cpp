@@ -3,6 +3,10 @@
 #include <string>
 #include <ctime>
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -35,6 +39,18 @@ int linhas = 20;
 int posx = 0;
 int posy = 0;
 int score = 0;
+
+// GAME OVER
+bool fim = false;
+
+int* mapa = (int*)calloc(colunas * linhas, sizeof(int));
+// booleanos teclas
+bool ad = false;
+bool ae = false;
+bool baixo = false;
+float countdireita = 0.0;
+float countesquerda = 0.0;
+float speedx = 0.4;
 
 void pontuaçao(int x) {
 	if (x == 1) {
@@ -115,6 +131,7 @@ bool inserir_peca(int p, int ang, int* mapa) {//p representa qual das 7 peças s
 				}
 				mapa[(linhas - 2) * colunas + posx + l] = 12;
 			}
+			return true;
 		}
 		if (ang == 2) {
 			if (colunas < posx + 2) {
@@ -154,7 +171,6 @@ bool inserir_peca(int p, int ang, int* mapa) {//p representa qual das 7 peças s
 			}
 			for (int l = 1; l < 4; l++) {
 				if (mapa[(linhas - l) * colunas + posx + 1] != 0) {
-					printf("aqui %d \n", (linhas - l) * colunas + posx + 1);
 					return false;
 				}
 				mapa[(linhas - l) * colunas + posx + 1] = 12;
@@ -389,9 +405,345 @@ bool inserir_peca(int p, int ang, int* mapa) {//p representa qual das 7 peças s
 			return true;
 		}
 	}
-	else { return false; }
+	if (p < 1 || p>7) {
+		return false;
+	}
 }
+bool inserir_peca_r(int p, int ang, int* mapa) {//p representa qual das 7 peças será desenhada e o ang representa qual o angulo inicial da peça
+	if (p == 1) {
+		if (ang == 1 || ang == 3) { //assumi que o angulo 1 é o horizontal
+			if (colunas < posx + 4) {
+				posx = colunas - 4;//isto pq assumi q a posição do player e o quadrado mais a esquerda
+			}
+			for (int l = 0; l < 4; l++) {
+				if (mapa[(posy)*colunas + posx + l] != 0) {
+					return false;
+				}
+				mapa[(posy)*colunas + posx + l] = 11;
+			}
+			return true;
+		}
+		if (ang == 2 || ang == 4) {
+			for (int x = 0; x < 4; x++) {
+				if (mapa[(posy)*colunas + posx - x * colunas] != 0) {//verifica se ha quatro espaços para baixo na posicaox do player
+					return false;
+				}
+				mapa[(posy)*colunas + posx - x * colunas] = 11;
+			}
+			return true;
+		}
+		return false;
+	}
+	if (p == 2) {
+		if (ang == 1) {
+			if (colunas < posx + 3) {
+				posx = colunas - 3;
+			}
+			if (mapa[(posy)*colunas + posx] != 0 && mapa[(posy)*colunas + posx] != 12) {
+				return false;
+			}
+			mapa[(posy)*colunas + posx] = 12;
+			if (posy - 1 < 0) {
+				return false;
+			}
+			for (int l = 0; l < 3; l++) {
+				if (mapa[(posy - 1) * colunas + posx + l] != 0) {
+					return false;
+				}
+				mapa[(posy - 1) * colunas + posx + l] = 12;
+			}
+		}
+		if (ang == 2) {
+			if (colunas < posx + 2) {
+				posx = colunas - 2;
+			}
+			if (mapa[(posy)*colunas + posx] != 0 || mapa[(posy)*colunas + posx + 1] != 0) {
+				return false;
+			}
+			if (posy - 1 < 0 || posy - 2 < 0) {
+				return false;
+			}
+			mapa[(posy)*colunas + posx] = 12;
+			mapa[(posy)*colunas + posx + 1] = 12;
+			if ((mapa[(posy - 1) * colunas + posx] != 0 && mapa[(posy - 1) * colunas + posx] != 12) || (mapa[(posy - 2) * colunas + posx] != 0 && mapa[(posy - 2) * colunas + posx] != 12)) {
+				return false;
+			}
+			mapa[(posy - 1) * colunas + posx] = 12;
+			mapa[(posy - 2) * colunas + posx] = 12;
+			return true;
+		}
+		if (ang == 3) {
+			if (posx < 2) {
+				posx = 2;
+			}
+			for (int l = 0; l < 3; l++) {
+				if (mapa[(posy)*colunas + posx - l] != 0 && mapa[(posy - 1) * colunas + posx] != 12) {
+					return false;
+				}
+				mapa[(posy)*colunas + posx - l] = 12;
+			}
+			if (posy - 1 < 0) {
+				return false;
+			}
+			if (mapa[(posy - 1) * colunas + posx] != 0 && mapa[(posy - 1) * colunas + posx] != 12) {
+				return false;
+			}
+			mapa[(posy - 1) * colunas + posx] = 12;
+			return true;
+		}
+		if (ang == 4) {
+			if (colunas < posx + 2) {
+				posx = colunas - 2;
+			}
+			for (int l = 1; l < 4; l++) {
+				if (mapa[(posy + 1 - l) * colunas + posx + 1] != 0 || posy + 1 - l < 0) {
+					return false;
+				}
+				mapa[(posy + 1 - l) * colunas + posx + 1] = 12;
+			}
+			if (mapa[(posy - 2) * colunas + posx] != 0 && mapa[(posy - 2) * colunas + posx] != 12) {
+				return false;
+			}
+			mapa[(posy - 2) * colunas + posx] = 12;
+			return true;
+		}
 
+	}
+	if (p == 3) {
+		if (ang == 1) {
+			if (posx - 3 < -1) {
+				posx = 2;
+			}
+			if (mapa[(posy)*colunas + posx] != 0 || posy - 1 < 0) {
+				return false;
+			}
+			mapa[(posy)*colunas + posx] = 13;
+			for (int l = 0; l < 3; l++) {
+				if (mapa[(posy - 1) * colunas + posx - l] != 0 || posy - l + 1 < 0) {
+					return false;
+				}
+				mapa[(posy - 1) * colunas + posx - l] = 13;
+			}
+			return true;
+		}
+		if (ang == 2) {
+			if (posx == 0) {
+				posx = 1;
+			}
+			if (mapa[(posy - 2) * colunas + posx] != 0 || posy - 2 < 0) {
+				return false;
+			}
+			mapa[(posy - 2) * colunas + posx] = 13;
+			for (int l = 1; l < 4; l++) {
+				if (mapa[(posy - l + 1) * colunas + posx - 1] != 0 || posy - l + 1 < 0) {
+					return false;
+				}
+				mapa[(posy - l + 1) * colunas + posx - 1] = 13;
+			}
+			return true;
+		}
+		if (ang == 3) {
+			if (colunas < posx + 3) {
+				posx = colunas - 3;
+			}
+			if (mapa[(posy - 1) * colunas + posx] != 0 || posy - 1 < 0) {
+				return false;
+			}
+			mapa[(posy - 1) * colunas + posx] = 13;
+			for (int l = 0; l < 3; l++) {
+				if (mapa[(posy)*colunas + posx + l] != 0) {
+					return false;
+				}
+				mapa[(posy)*colunas + posx + l] = 13;
+			}
+			return true;
+		}
+		if (ang == 4) {
+			if (posx == colunas - 1) {
+				posx = colunas - 2;
+			}
+			if (mapa[(posy)*colunas + posx] != 0) {
+				return false;
+			}
+			mapa[(posy)*colunas + posx] = 13;
+			for (int l = 0; l < 3; l++) {
+				if (mapa[(posy - l) * colunas + posx + 1] != 0 || posy - l < 0) {
+					return false;
+				}
+				mapa[(posy - l) * colunas + posx + 1] = 13;
+			}
+			return true;
+		}
+	}
+	if (p == 4) {
+		if (colunas < posx + 2) {
+			posx = colunas - 2;
+		}
+		if (mapa[(posy)*colunas + posx + 1] != 0 || mapa[(posy)*colunas + posx] != 0) {
+			return false;
+		}
+		mapa[(posy)*colunas + posx + 1] = 14;
+		mapa[(posy)*colunas + posx] = 14;
+		if (mapa[(posy - 1) * colunas + posx + 1] != 0 || mapa[(posy - 1) * colunas + posx] != 0 || posy - 1 < 0) {
+			return false;
+		}
+		mapa[(posy - 1) * colunas + posx + 1] = 14;
+		mapa[(posy - 1) * colunas + posx] = 14;
+		return true;
+	}
+	if (p == 5) {
+		if (ang == 1 || ang == 3) {
+			if (colunas < posx + 3) {
+				posx = colunas - 3;
+			}
+			if (mapa[colunas * (posy)+posx] != 0 || mapa[colunas * (posy)+posx + 1] != 0) {
+				return false;
+			}
+			mapa[colunas * (posy)+posx] = 15;
+			mapa[colunas * (posy)+posx + 1] = 15;
+			if (mapa[colunas * (posy - 1) + posx + 2] != 0 || mapa[colunas * (posy - 1) + posx + 1] != 0 || posy - 1 < 0) {
+				return false;
+			}
+			mapa[colunas * (posy - 1) + posx + 2] = 15;
+			mapa[colunas * (posy - 1) + posx + 1] = 15;
+			return true;
+		}
+		if (ang == 2 || ang == 4) {
+			if (posx == 0) {
+				posx = 1;
+			}
+			if (mapa[colunas * (posy)+posx] != 0 || mapa[colunas * (posy - 1) + posx] != 0 || posy - 1 < 0) {
+				return false;
+			}
+			mapa[colunas * (posy)+posx] = 15;
+			mapa[colunas * (posy - 1) + posx] = 15;
+			if (mapa[colunas * (posy - 1) + posx - 1] != 0 || mapa[colunas * (posy - 2) + posx - 1] != 0 || posy - 2 < 0) {
+				return false;
+			}
+			mapa[colunas * (posy - 2) + posx - 1] = 15;
+			mapa[colunas * (posy - 1) + posx - 1] = 15;
+			return true;
+		}
+	}
+	if (p == 6) {
+		if (ang == 1 || ang == 3) {
+			if (colunas < posx + 3) {
+				posx = colunas - 3;
+			}
+			if (mapa[colunas * (posy - 1) + posx] != 0 || mapa[colunas * (posy - 1) + posx + 1] != 0 || posy - 1 < 0) {
+				return false;
+			}
+			mapa[colunas * (posy - 1) + posx] = 16;
+			mapa[colunas * (posy - 1) + posx + 1] = 16;
+			if (mapa[colunas * (posy)+posx + 1] != 0 || mapa[colunas * (posy)+posx + 2] != 0) {
+				return false;
+			}
+			mapa[colunas * (posy)+posx + 1] = 16;
+			mapa[colunas * (posy)+posx + 2] = 16;
+			return true;
+		}
+		if (ang == 2 || ang == 4) {
+			if (posx == colunas - 1) {
+				posx = colunas - 2;
+			}
+			if (mapa[colunas * (posy)+posx] != 0 || mapa[colunas * (posy - 1) + posx] != 0 || posy - 1 < 0) {
+				return false;
+			}
+			mapa[colunas * (posy)+posx] = 16;
+			mapa[colunas * (posy - 1) + posx] = 16;
+			if (mapa[colunas * (posy - 1) + posx + 1] != 0 || mapa[colunas * (posy - 2) + posx + 1] != 0 || posy - 2 < 0) {
+				return false;
+			}
+			mapa[colunas * (posy - 2) + posx + 1] = 16;
+			mapa[colunas * (posy - 1) + posx + 1] = 16;
+			return true;
+		}
+	}
+	if (p == 7) {
+		if (ang == 1) {
+			if (posx == 0) {
+				posx = 1;
+			}
+			if (posx == colunas - 1) {
+				posx = colunas - 2;
+			}
+			if (mapa[colunas * (posy)+posx] != 0 || mapa[colunas * (posy - 1) + posx] != 0 || posy - 1 < 0) {
+				return false;
+			}
+			mapa[colunas * (posy)+posx] = 17;
+			mapa[colunas * (posy - 1) + posx] = 17;
+			if (mapa[colunas * (posy - 1) + posx + 1] != 0 || mapa[colunas * (posy - 1) + posx - 1] != 0) {
+				return false;
+			}
+			mapa[colunas * (posy - 1) + posx + 1] = 17;
+			mapa[colunas * (posy - 1) + posx - 1] = 17;
+			return true;
+		}
+		if (ang == 2) {
+			if (posx == 0) {
+				posx = 1;
+			}
+			if (mapa[colunas * (posy - 1) + posx] != 0 || mapa[colunas * (posy - 1) + posx - 1] != 0) {
+				return false;
+			}
+			mapa[colunas * (posy - 1) + posx] = 17;
+			mapa[colunas * (posy - 1) + posx - 1] = 17;
+			if (mapa[colunas * (posy)+posx - 1] != 0 || mapa[colunas * (posy - 2) + posx - 1] != 0 || posy - 2 < 0) {
+				return false;
+			}
+			mapa[colunas * (posy)+posx - 1] = 17;
+			mapa[colunas * (posy - 2) + posx - 1] = 17;
+			return true;
+		}
+		if (ang == 3) {
+			if (posx == 0) {
+				posx = 1;
+			}
+			if (posx == 9) {
+				posx = 8;
+			}
+			if (mapa[colunas * (posy)+posx] != 0 || mapa[colunas * (posy - 1) + posx] != 0 || posy - 1 < 0) {
+				return false;
+			}
+			mapa[colunas * (posy)+posx] = 17;
+			mapa[colunas * (posy - 1) + posx] = 17;
+			if (mapa[colunas * (posy)+posx + 1] != 0 || mapa[colunas * (posy)+posx - 1] != 0) {
+				return false;
+			}
+			mapa[colunas * (posy)+posx + 1] = 17;
+			mapa[colunas * (posy)+posx - 1] = 17;
+			return true;
+		}
+		if (ang == 4) {
+			if (posx == colunas - 1) {
+				posx = colunas - 2;
+			}
+			if (mapa[colunas * (posy - 1) + posx] != 0 || mapa[colunas * (posy - 1) + posx + 1] != 0 || posy - 1 < 0) {
+				return false;
+			}
+			mapa[colunas * (posy - 1) + posx] = 17;
+			mapa[colunas * (posy - 1) + posx + 1] = 17;
+			if (mapa[colunas * (posy)+posx - 1] != 0 || mapa[colunas * (posy - 2) + posx - 1] != 0 || posy - 2 < 0) {
+				return false;
+			}
+			mapa[colunas * (posy)+posx + 1] = 17;
+			mapa[colunas * (posy - 2) + posx + 1] = 17;
+			return true;
+		}
+	}
+	if (p < 1 || 7 < p) {
+		return false;
+	}
+}
+void display_mapa(int* mapa) {
+	for (int i = 0; i < 4*4*2; i++) {
+		printf("%d ", mapa[i]);
+		if ((i + 1) % 8 == 0) {
+			printf("\n");
+		}
+	}
+	printf("\n\n");
+}
 bool anda_baixo(int* mapa) {
 	int p1 = -1, p2 = -1, p3 = -1, p4 = -1, c = 0;
 	for (int i = colunas * linhas - 1; -1 < i; i--) {
@@ -506,7 +858,7 @@ bool anda_esquerda(int* mapa) {
 	int aux1 = mapa[p1], aux2 = mapa[p2], aux3 = mapa[p3], aux4 = mapa[p4];
 	mapa[p1] = 0; mapa[p2] = 0; mapa[p3] = 0; mapa[p4] = 0;
 	mapa[p1 - 1] = aux1; mapa[p2 - 1] = aux2; mapa[p3 - 1] = aux3; mapa[p4 - 1] = aux4;
-
+	posx--;
 	return true;
 
 }
@@ -556,7 +908,7 @@ bool anda_direita(int* mapa) {
 	int aux1 = mapa[p1], aux2 = mapa[p2], aux3 = mapa[p3], aux4 = mapa[p4];
 	mapa[p1] = 0; mapa[p2] = 0; mapa[p3] = 0; mapa[p4] = 0;
 	mapa[p1 + 1] = aux1; mapa[p2 + 1] = aux2; mapa[p3 + 1] = aux3; mapa[p4 + 1] = aux4;
-
+	posx++;
 	return true;
 }
 bool linha_vazia(int* mapa, int linha) {
@@ -591,23 +943,117 @@ void apaga_linha(int* mapa, int linha) {
 		mapa[colunas * (linhas - 1) + c] = 0;
 	}
 }
-int* create_fila(int siz) {
-	int* fila = (int*)calloc(siz, sizeof(int));
-	for (int i = 0; i < siz; i++) {
-		fila[i] = rand() % 7 + 1;
+int* create_fila() {
+	time_t timer;
+	struct tm y2k = { 0 };
+	double seconds;
+	y2k.tm_hour = 0;   y2k.tm_min = 0; y2k.tm_sec = 0;
+	y2k.tm_year = 100; y2k.tm_mon = 4; y2k.tm_mday = 9;
+
+	int* fila = (int*)calloc(4, sizeof(int));
+
+	time(&timer);
+	seconds = difftime(timer, mktime(&y2k));
+	int y = (int)(seconds + 0.5);
+	printf("%d\n", y);
+	fila[0] = y % 10;
+	fila[1] = y / 100 % 10;
+	fila[2] = y / 1000 % 10 % 10;
+	fila[3] = y / 10 % 10;
+	if (y % 10 == 0 || y % 10 == 8 || y % 10 == 9) {
+		fila[0] = rand() % 7 + 1;
 	}
+	if (y / 100 % 10 == 0 || y / 100 % 10 == 8 || y / 100 % 10 == 9) {
+		fila[1] = rand() % 7 + 1;
+	}
+	if (y / 1000 % 10 % 10 == 0 || y / 1000 % 10 % 10 == 8 || y / 1000 % 10 % 10 == 9) {
+		fila[2] = rand() % 7 + 1;
+	}
+	if (y / 10 % 10 == 0 || y / 10 % 10 == 8 || y / 10 % 10 == 9) {
+		fila[3] = rand() % 7 + 1;
+	}
+
+
 	return fila;
 }
+void anda_fila(int* fila) {
 
-void anda_fila(int* fila, int siz) {
-
-	for (int i = 0; i < siz - 1; i++) {
+	for (int i = 0; i < 4 - 1; i++) {
 		fila[i] = fila[i + 1];
 	}
-	fila[siz - 1] = rand() % 7 + 1;
+	time_t timer;
+	struct tm y2k = { 0 };
+	double seconds;
+	y2k.tm_hour = 0;   y2k.tm_min = 0; y2k.tm_sec = 0;
+	y2k.tm_year = 100; y2k.tm_mon = 4; y2k.tm_mday = 9;
+
+
+	time(&timer);
+	seconds = difftime(timer, mktime(&y2k));
+	int y = (int)(seconds + 0.5);
+	if (y%10 == 0 || y%10 == 8 || y%10 == 9) {
+		y = rand() % 7 + 1;
+	}
+	fila[4 - 1] = y % 10;
+}
+void anda_auxiliar(int* aux) {
+	for (int i = 2; i < 8; i++) {
+		aux[i - 2] = aux[i];
+		aux[i - 2 + 8] = aux[i + 8];
+		aux[i - 2 + 16] = aux[i + 16];
+		aux[i - 2 + 24] = aux[i + 24];
+		aux[i] = 0;
+		aux[i + 8] = 0;
+		aux[i + 16] = 0;
+		aux[i + 24] = 0;
+	}
+}
+void inserir_auxiliar(int* aux, int p) {
+	if (p == 1) {
+		aux[7] = 1;
+		aux[15] = 1;
+		aux[23] = 1;
+		aux[31] = 1;
+	}
+	if (p == 2) {
+		aux[6] = 2;
+		aux[7] = 2;
+		aux[15] = 2;
+		aux[23] = 2;
+	}
+	if (p == 3) {
+		aux[7] = 3;
+		aux[15] = 3;
+		aux[23] = 3;
+		aux[22] = 3;
+	}
+	if (p == 4) {
+		aux[7] = 4;
+		aux[6] = 4;
+		aux[14] = 4;
+		aux[15] = 4;
+	}
+	if (p == 5) {
+		aux[6] = 5;
+		aux[14] = 5;
+		aux[15] = 5;
+		aux[23] = 5;
+	}
+	if (p == 6) {
+		aux[7] = 6;
+		aux[15] = 6;
+		aux[14] = 6;
+		aux[22] = 6;
+	}
+	if (p == 7) {
+		aux[7] = 7;
+		aux[15] = 7;
+		aux[23] = 7;
+		aux[14] = 7;
+	}
 }
 
-void rotacoes(int p, int* mapa, int ang, int lado) {
+bool rotacoes(int p, int* mapa, int ang, int lado) {
 	int cima = 0;
 	int baixo = 0;
 	remove_andamento(mapa);
@@ -621,22 +1067,24 @@ void rotacoes(int p, int* mapa, int ang, int lado) {
 		ang = 4;
 		lado = 0;
 	}
-	if (!inserir_peca(p, ang + lado, mapa)) {
+	if (!inserir_peca_r(p, ang + lado, mapa)) {
 		if (cima == 1) {
 			remove_andamento(mapa);
 			ang = 4;
-			inserir_peca(p, ang, mapa);
+			inserir_peca_r(p, ang, mapa);
 		}
 		if (baixo == 1) {
 			remove_andamento(mapa);
 			ang = 1;
-			inserir_peca(p, ang, mapa);
+			inserir_peca_r(p, ang, mapa);
 		}
 		if (baixo == 0 && cima == 0) {
 			remove_andamento(mapa);
-			inserir_peca(p, ang, mapa);
+			inserir_peca_r(p, ang, mapa);
 		}
+		return false;
 	}
+	return true;
 }
 // settings
 int SCR_WIDTH = 800;
@@ -680,6 +1128,10 @@ GLfloat defsText8[3] = { 0.5f, 0.95, 0.6f };
 
 //menu buttons
 int btnSelected = -1;
+
+
+//classificaçoes
+std::string arraynome[] = { "","","","","" };
 
 //pages
 const int numpages = 4; //number of pages
@@ -856,8 +1308,6 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	int* mapa = (int*)calloc(10*20, sizeof(int));
-
 #ifdef __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
@@ -925,6 +1375,22 @@ int main()
 	float posxa = 0.0f;
 	float posya = 0.0f;
 	
+	int* auxiliar = (int*)calloc(4 * 8, sizeof(int));
+	int* teste = create_fila();
+	inserir_auxiliar(auxiliar, teste[0]);
+	anda_auxiliar(auxiliar);
+	inserir_auxiliar(auxiliar, teste[1]);
+	anda_auxiliar(auxiliar);
+	inserir_auxiliar(auxiliar, teste[2]);
+	anda_auxiliar(auxiliar);
+	inserir_auxiliar(auxiliar, teste[3]);
+	int ang = rand() % 4 + 1;
+	int clock = 0;
+	bool ins = true;
+
+	ins = inserir_peca(teste[0], ang, mapa);
+	posy = 19;
+	
 	glm::mat4 model;
 	bool arrived[2] = { false,false };
 	while (!glfwWindowShouldClose(window))
@@ -940,7 +1406,6 @@ int main()
 		// input
 		// -----
 		processInput(window);
-
 		// render
 		// ------
 		glClearColor(0.000, 0.545, 0.545, 1.0f);
@@ -972,6 +1437,14 @@ int main()
 				arrived[1] = true;
 			if (arrived[0] && arrived[1]) {
 				//printf("%f %f\n", posxf, posyf);
+				if (page == 2) {
+					free(mapa);
+					mapa = (int*)calloc(colunas * linhas, sizeof(int));
+					ins = inserir_peca(teste[0], ang, mapa);
+					posy = 19;
+					fim = false;
+
+				}
 				transition = false;
 				lastpage = page;
 				page = nextpage;
@@ -1042,128 +1515,192 @@ int main()
 				renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH*0.1, static_cast<float>(SCR_HEIGHT*0.3), SCR_POS_X + SCR_WIDTH*0.9, static_cast<float>(SCR_HEIGHT*0.9)), glm::vec3(0.529, 0.808, 0.922));
 			}
 			else {
+				if (fim) {
+					LetterShader.setBool("isTexture", true);
+					RenderText(LetterShader, "GAME OVER", 0.495, 0.3, 0.7, glm::vec3(0.1f, 0.1f, 0.1f));
+					RenderText(LetterShader, "Pontuação: " + std::to_string(score), 0.495, 0.50, 0.7, glm::vec3(0.1f, 0.1f, 0.1f));
+					LetterShader.setBool("isTexture", false);
+					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * 0.1, static_cast<float>(SCR_HEIGHT * 0.3), SCR_POS_X + SCR_WIDTH * 0.9, static_cast<float>(SCR_HEIGHT * 0.9)), glm::vec3(0.529, 0.808, 0.922));
 
-			}
-			LetterShader.setBool("isTexture", true);
-			float * size;
-			size = RenderText(LetterShader, "Menu", defsText5[0], defsText5[1], defsText5[2], colorText5);
-			sizeText5[0] = size[0]; sizeText5[1] = size[1]; sizeText5[2] = size[2]; sizeText5[3] = size[3];
-
-			LetterShader.setBool("isTexture", false);
-
-			//array de teste para as peças
-			//int mapa[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0 };
-			int* teste = create_fila(4);
-			int clock = 0;
-			int ang = rand() % 4 + 1;
-			while (inserir_peca(teste[0], (ang), mapa)) {
-				posy = linhas - 1;
-				printf("\n fila: ");
-				for (int i = 0; i < 4; i++) {
-					printf("%d ", teste[i]);
 				}
-
-
-				while (true) {
-					//aqui tera de ter um if com um clock ou algo a simular um para q de tempo em tempo a peça desça mesmo q o player nao faça nada
-						
-					if (anda_baixo(mapa)) {
-							posy = posy - 1;
+				else {
+					if (ad) {
+						bool rotacoesdireita = rotacoes(teste[0], mapa, ang, 1);
+						if (rotacoesdireita) {
+							if (ang != 4) {
+								ang += 1;
+							}
+							else {
+								ang = 1;
+							}
 						}
-					if (!anda_baixo(mapa)) {
-						if (!(linha_cheia(mapa, posy) || linha_cheia(mapa, posy + 1)) || linha_cheia(mapa, posy + 2) || linha_cheia(mapa, posy + 3) || linha_cheia(mapa, posy + -1) || linha_cheia(mapa, posy - 2) || linha_cheia(mapa, posy - 3)) {
-							anda_fila(teste, 4);
-							break;
+						ad = false;
+					}
+					if (ae) {
+
+						bool rotacoesesquerda = rotacoes(teste[0], mapa, ang, -1);
+						if (rotacoesesquerda) {
+							if (ang != 1) {
+								ang -= 1;
+							}
+							else {
+								ang = 4;
+							}
+						}
+						ae = false;
+					}
+					clock++;
+					if ((clock % 20 == 0 || baixo) && ins) {
+						if (anda_baixo(mapa)) {
+							posy = posy - 1;
+							baixo = false;
 						}
 						else {
-							for (int i = 0; i < linhas; i++) {
-								if (linha_cheia(mapa, i)) {
-									apaga_linha(mapa, i);
-									i = 0;
-								}
-								anda_fila(teste, 4);
+							if (!(linha_cheia(mapa, posy) || linha_cheia(mapa, posy + 1) || linha_cheia(mapa, posy + 2) || linha_cheia(mapa, posy + 3) || linha_cheia(mapa, posy + -1) || linha_cheia(mapa, posy - 2) || linha_cheia(mapa, posy - 3))) {
+								anda_fila(teste);
+								anda_auxiliar(auxiliar);
+								inserir_auxiliar(auxiliar, teste[3]);
 								ang = rand() % 4 + 1;
-								break;
+								ins = inserir_peca(teste[0], ang, mapa);
+								posy = 19;
+								if (!ins) {
+									fim = true;
+								}
+
+							}
+							else {
+								int pont = 0;
+								for (int i = 0; i < linhas; i++) {
+									if (linha_cheia(mapa, i)) {
+										pont++;
+										apaga_linha(mapa, i);
+										pontuaçao(pont);
+
+										i = 0;
+									}
+								}
+								anda_fila(teste);
+								anda_auxiliar(auxiliar);
+								inserir_auxiliar(auxiliar, teste[3]);
+								ang = rand() % 4 + 1;
+								ins = inserir_peca(teste[0], ang, mapa);
+								posy = 19;
 							}
 						}
 					}
 
+					RenderText(LetterShader, "Pontuação", 0.7, 0.25, 0.7, glm::vec3(0.1f, 0.1f, 0.1f));
+					RenderText(LetterShader, std::to_string(score), 0.7, 0.35, 0.7, glm::vec3(0.1f, 0.1f, 0.1f));
 
-					//if glwpress_right anda_direita and if true posx = posx+1; corri o programa so em cpp entao nao dava para usar os glwpress q o tiago tinha feito
-					//if glwpress_left anda_esquerda and if true posx = posx-1;
-				//if glwpress_a  rotacoes(teste[0], mapa, ang, -1)}
-				// if glwpress_d rotacoes(teste[0], mapa, ang, +1)
+					LetterShader.setBool("isTexture", false);
+
+
+					//definação dos limites do campo
+					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * 0.09, static_cast<float>(SCR_HEIGHT * 0.2), SCR_POS_X + SCR_WIDTH * 0.10, static_cast<float>(SCR_HEIGHT * 0.8)), glm::vec3(0.0f, 0.0f, 0.0f));
+					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * 0.09, static_cast<float>(SCR_HEIGHT * 0.185), SCR_POS_X + SCR_WIDTH * 0.41, static_cast<float>(SCR_HEIGHT * 0.20)), glm::vec3(0.0f, 0.0f, 0.0f));
+					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * 0.40, static_cast<float>(SCR_HEIGHT * 0.2), SCR_POS_X + SCR_WIDTH * 0.41, static_cast<float>(SCR_HEIGHT * 0.8)), glm::vec3(0.0f, 0.0f, 0.0f));
+
+					//posição dinamica
+					float auxx = 0.0;
+					float auxy = 0.0;
+					int count = 0;
+					int aux = 0;
+
+					for (int i = 0;i < (linhas * colunas);i++) {
+						if (mapa[i] == 0) {
+							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(0.000, 0.545, 0.545));
+						}
+						else if (mapa[i] == 1 || mapa[i] == 11) {
+							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(1.0f, 0.0f, 0.0f));
+						}
+						else if (mapa[i] == 2 || mapa[i] == 12) {
+							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(0.0f, 0.0f, 1.0f));
+						}
+						else if (mapa[i] == 3 || mapa[i] == 13) {
+							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(0.0f, 1.0f, 0.0f));
+						}
+						else if (mapa[i] == 4 || mapa[i] == 14) {
+							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(1.0f, 1.0f, 0.0f));
+						}
+						else if (mapa[i] == 5 || mapa[i] == 15) {
+							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(0.0f, 1.0f, 1.0f));
+						}
+						else if (mapa[i] == 6 || mapa[i] == 16) {
+							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(1.0f, 0.0f, 1.0f));
+						}
+						else if (mapa[i] == 7 || mapa[i] == 17) {
+							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(1.0f, 0.5f, 0.0f));
+						}
+
+						if ((i - 9) % 10 == 0 && i != 0) {
+							auxy = auxy + 0.03;
+							auxx = 0.0;
+						}
+						else {
+							auxx = auxx + 0.03;
+						}
+					}
+
+					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * 0.89, static_cast<float>(SCR_HEIGHT * 0.2), SCR_POS_X + SCR_WIDTH * 0.9, static_cast<float>(SCR_HEIGHT * 0.46)), glm::vec3(0.0f, 0.0f, 0.0f));
+					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * 0.54, static_cast<float>(SCR_HEIGHT * 0.185), SCR_POS_X + SCR_WIDTH * 0.9, static_cast<float>(SCR_HEIGHT * 0.20)), glm::vec3(0.0f, 0.0f, 0.0f));
+					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * 0.54, static_cast<float>(SCR_HEIGHT * 0.2), SCR_POS_X + SCR_WIDTH * 0.55, static_cast<float>(SCR_HEIGHT * 0.46)), glm::vec3(0.0f, 0.0f, 0.0f));
+					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * 0.54, static_cast<float>(SCR_HEIGHT * 0.46), SCR_POS_X + SCR_WIDTH * 0.9, static_cast<float>(SCR_HEIGHT * 0.475)), glm::vec3(0.0f, 0.0f, 0.0f));
+
+					auxx = 0;
+					auxy = 0;
+
+
+					for (int i = 2;i < 4 * 4 * 2;i++) {
+
+						if (auxiliar[i] == 0) {
+							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.6 + auxx), static_cast<float>(SCR_HEIGHT * (0.3 + auxy)), SCR_POS_X + SCR_WIDTH * (0.60 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.3 + auxy + 0.03))), glm::vec3(0.000, 0.545, 0.545));
+						}
+						else if (auxiliar[i] == 1 || auxiliar[i] == 11) {
+							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.6 + auxx), static_cast<float>(SCR_HEIGHT * (0.3 + auxy)), SCR_POS_X + SCR_WIDTH * (0.60 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.3 + auxy + 0.03))), glm::vec3(1.0f, 0.0f, 0.0f));
+						}
+						else if (auxiliar[i] == 2 || auxiliar[i] == 12) {
+							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.6 + auxx), static_cast<float>(SCR_HEIGHT * (0.3 + auxy)), SCR_POS_X + SCR_WIDTH * (0.60 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.3 + auxy + 0.03))), glm::vec3(0.0f, 0.0f, 1.0f));
+						}
+						else if (auxiliar[i] == 3 || auxiliar[i] == 13) {
+							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.6 + auxx), static_cast<float>(SCR_HEIGHT * (0.3 + auxy)), SCR_POS_X + SCR_WIDTH * (0.60 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.3 + auxy + 0.03))), glm::vec3(0.0f, 1.0f, 0.0f));
+						}
+						else if (auxiliar[i] == 4 || auxiliar[i] == 14) {
+							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.6 + auxx), static_cast<float>(SCR_HEIGHT * (0.3 + auxy)), SCR_POS_X + SCR_WIDTH * (0.60 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.3 + auxy + 0.03))), glm::vec3(1.0f, 1.0f, 0.0f));
+						}
+						else if (auxiliar[i] == 5 || auxiliar[i] == 15) {
+							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.6 + auxx), static_cast<float>(SCR_HEIGHT * (0.3 + auxy)), SCR_POS_X + SCR_WIDTH * (0.60 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.3 + auxy + 0.03))), glm::vec3(0.0f, 1.0f, 1.0f));
+						}
+						else if (auxiliar[i] == 6 || auxiliar[i] == 16) {
+							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.6 + auxx), static_cast<float>(SCR_HEIGHT * (0.3 + auxy)), SCR_POS_X + SCR_WIDTH * (0.60 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.3 + auxy + 0.03))), glm::vec3(1.0f, 0.0f, 1.0f));
+						}
+						else if (auxiliar[i] == 7 || auxiliar[i] == 17) {
+							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.6 + auxx), static_cast<float>(SCR_HEIGHT * (0.3 + auxy)), SCR_POS_X + SCR_WIDTH * (0.60 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.3 + auxy + 0.03))), glm::vec3(1.0f, 0.5f, 0.0f));
+						}
+						if ((i - 7) % 8 == 0 && i != 0) {
+							auxy = auxy + 0.03;
+							auxx = 0.0;
+							i = i + 2;
+						}
+						else {
+							if ((i - 1) % 2 == 0) {
+								auxx = auxx + 0.06;
+							}
+							else {
+								auxx = auxx + 0.03;
+							}
+
+						}
+					}
+
 				}
 			}
-			//definação dos limites do campo
-			renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * 0.09, static_cast<float>(SCR_HEIGHT * 0.2), SCR_POS_X + SCR_WIDTH * 0.10, static_cast<float>(SCR_HEIGHT * 0.8)), glm::vec3(0.0f,0.0f,0.0f));	
-			renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * 0.09, static_cast<float>(SCR_HEIGHT * 0.185), SCR_POS_X + SCR_WIDTH * 0.41, static_cast<float>(SCR_HEIGHT * 0.20)), glm::vec3(0.0f, 0.0f, 0.0f));
-			renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * 0.40, static_cast<float>(SCR_HEIGHT * 0.2), SCR_POS_X + SCR_WIDTH * 0.41, static_cast<float>(SCR_HEIGHT * 0.8)), glm::vec3(0.0f, 0.0f, 0.0f));
-				
-			//posição dinamica
-			float auxx = 0.0;
-			float auxy = 0.0;
-			int count = 0;
-			int aux = 0;
-			for (int i = 0;i < (linhas*colunas);i++) {
-				if (mapa[i] == 0) {
-					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(0.000, 0.545, 0.545));
-				}
-				if (mapa[i] == 1) {
-					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(1.0f, 0.0f, 0.0f));
-				}
-				if (mapa[i] == 2) {
-					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(1.0f, 0.0f, 0.0f));
-				}
-				if (mapa[i] == 3) {
-					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(0.0f, 1.0f, 0.0f));
-				}
-				if (mapa[i] == 4) {
-					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(0.0f, 0.0f, 1.0f));
-				}
-				if (mapa[i] == 5) {
-					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(0.5f, 0.5f, 0.0f));
-				}
-				if (mapa[i] == 6) {
-					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(0.5f, 0.0f, 0.5f));
-				}
-				if (mapa[i] == 7) {
-					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(0.0f, 1.5f, 0.5f));
-				}
-				if (mapa[i] == 11) {
-					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(1.0f, 0.0f, 1.0f));
-				}
-				if (mapa[i] == 12) {
-					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(2.0f, 1.0f, 0.0f));
-				}
-				if (mapa[i] == 13) {
-					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(1.0f, 0.0f, 1.0f));
-				}
-				if (mapa[i] == 14) {
-					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(1.0f, 0.0f, 2.0f));
-				}
-				if (mapa[i] == 15) {
-					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(1.0f, 3.0f, 0.0f));
-				}
-				if (mapa[i] == 16) {
-					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(1.0f, 0.9f, 0.8f));
-				}
-				if (mapa[i] == 16) {
-					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(0.0f, 0.3f, 1.0f));
-				}
-				if (mapa[i] == 17) {
-					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(0.0f, 0.8f, 0.0f));
-				}
-				if ((i - 9) % 10 == 0 && i != 0) {
-					auxy = auxy + 0.03;
-					auxx = 0.0;
-				}
-				else {
-					auxx = auxx + 0.03;
-				}
-			}
+			LetterShader.setBool("isTexture", true);
+			float* size;
+			size = RenderText(LetterShader, "Menu", defsText5[0], defsText5[1], defsText5[2], colorText5);
+			sizeText5[0] = size[0]; sizeText5[1] = size[1]; sizeText5[2] = size[2]; sizeText5[3] = size[3];
+			
+			
 		}
-		//teste
 		else if (page == 3) {
 			LetterShader.use();
 			LetterShader.setBool("isTransparency", true);
@@ -1174,8 +1711,10 @@ int main()
 			//primeiro valor
 			size = RenderText(LetterShader, "12000", 0.5f, 0.2f, 0.4f, glm::vec3(1.0f, 1.0f, 1.0f));
 			//Fazer o loop para mostrar os 5 primeiros resultados
-			//float x = size[1];
-			//size = RenderText(LetterShader, "11000", 0.5f, SCR_HEIGHT - (x + 50.0f), 0.4f, glm::vec3(1.0f, 1.0f, 1.0f));
+			for (int i = 0; i < 4;i++) {
+				float x = size[1];
+				size = RenderText(LetterShader, "11000", 0.5f, SCR_HEIGHT - (x + 50.0f), 0.4f, glm::vec3(1.0f, 1.0f, 1.0f));
+			}
 			
 			size = RenderText(LetterShader, "Menu", 0.5f, 0.9f, 0.6f, colorText7);
 			sizeText7[0] = size[0]; sizeText7[1] = size[1]; sizeText7[2] = size[2]; sizeText7[3] = size[3];
@@ -1201,7 +1740,6 @@ int main()
 			sizeText8[0] = size[0]; sizeText8[1] = size[1]; sizeText8[2] = size[2]; sizeText8[3] = size[3];
 			LetterShader.setBool("isTransparency", false);
 			renderImage(LetterShader, keyboard, glm::vec4(SCR_WIDTH*0.1, static_cast<float>(SCR_HEIGHT*0.4 + SCR_HEIGHT), SCR_WIDTH*0.9, static_cast<float>(SCR_HEIGHT*0.8+SCR_HEIGHT)), glm::vec3(1.0f, 1.0f, 1.0f));
-
 			
 		}
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -1245,6 +1783,38 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 					name += key;
 			}
 		}
+		else {
+			if (key == GLFW_KEY_W && action == GLFW_PRESS) {
+				ad = true;
+			}
+			if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
+				ae = true;
+			}
+			if ((key == GLFW_KEY_A || key == GLFW_KEY_LEFT) && action == GLFW_PRESS) {
+				anda_esquerda(mapa);
+				countesquerda = 0;
+			}
+			if ((key == GLFW_KEY_D || key == GLFW_KEY_RIGHT) && action == GLFW_PRESS) {
+				anda_direita(mapa);
+				countdireita = 0;
+			}
+			if ((key == GLFW_KEY_A || key == GLFW_KEY_LEFT) &&  action == GLFW_REPEAT) {
+				countesquerda += speedx;
+				if (countesquerda >= 1) {
+					anda_esquerda(mapa);
+					countesquerda = 0;
+				}
+				
+
+			}
+			if ((key == GLFW_KEY_D || key == GLFW_KEY_RIGHT) &&  action == GLFW_REPEAT) {
+				countdireita += speedx;
+				if (countdireita >= 1) {
+					anda_direita(mapa);
+					countdireita = 0;
+				}
+			}
+		}
 
 	}
 	
@@ -1259,7 +1829,13 @@ void processInput(GLFWwindow *window)
 			btnSelected = 1;
 	}
 
-
+	if (page == 2) {
+		if (isNamed) {
+			if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+				baixo = true;
+			}
+		}
+	}
 	if (btnSelected == 1)
 		colorText1 = glm::vec3(1.0f, 1.0f, 1.0f);
 	else
