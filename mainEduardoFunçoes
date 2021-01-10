@@ -8,6 +8,321 @@ int linhas = 20;
 int posx = 0;
 int posy = 0;
 int score = 0;
+bool inserir_peça_r(int p, int ang, int* mapa) {//p representa qual das 7 peças será desenhada e o ang representa qual o angulo inicial da peça
+    if (p == 1) {
+        if (ang == 1 || ang == 3) { //assumi que o angulo 1 é o horizontal
+            if (colunas < posx + 4) {
+                posx = colunas - 4;//isto pq assumi q a posição do player e o quadrado mais a esquerda
+            }
+            for (int l = 0; l < 4; l++) {
+                if (mapa[(posy) * colunas + posx + l] != 0) {
+                    return false;
+                }
+                mapa[(posy) * colunas + posx + l] = 11;
+            }
+            return true;
+        }
+        if (ang == 2 || ang == 4) {
+            for (int x = 0; x < 4; x++) {
+                if (mapa[(posy) * colunas + posx - x * colunas] != 0) {//verifica se ha quatro espaços para baixo na posicaox do player
+                    return false;
+                }
+                mapa[(posy) * colunas + posx - x * colunas] = 11;
+            }
+            return true;
+        }
+        return false;
+    }
+    if (p == 2) {
+        if (ang == 1) {
+            if (colunas < posx + 3) {
+                posx = colunas - 3;
+            }
+            if (mapa[(posy) * colunas + posx] != 0) {
+                return false;
+            }
+            mapa[(linhas - 1) * colunas + posx] = 12;
+            for (int l = 0; l < 3; l++) {
+                if (mapa[(posy - 1) * colunas + posx + l] != 0 || posy-1 < 0) {
+                    return false;
+                }
+                mapa[(posy - 1) * colunas + posx + l] = 12;
+            }
+        }
+        if (ang == 2) {
+            if (colunas < posx + 2) {
+                posx = colunas - 2;
+            }
+            if (mapa[(posy) * colunas + posx] != 0 || mapa[(posy) * colunas + posx + 1] != 0) {
+                return false;
+            }
+            mapa[(posy) * colunas + posx] = 12;
+            mapa[(posy) * colunas + posx + 1] = 12;
+            if (mapa[(posy-1) * colunas + posx] != 0 || mapa[(posy-2) * colunas + posx] != 0 || posy - 2 < 0 || posy - 1 < 0) {
+                return false;
+            }
+            mapa[(posy-1) * colunas + posx] = 12;
+            mapa[(posy-2) * colunas + posx] = 12;
+            return true;
+        }
+        if (ang == 3) {
+            if (posx < 2) {
+                posx = 2;
+            }
+            for (int l = 0; l < 3; l++) {
+                if (mapa[(posy) * colunas + posx - l] != 0) {
+                    return false;
+                }
+                mapa[(posy) * colunas + posx - l] = 12;
+            }
+            if (mapa[(posy-1) * colunas + posx] != 0 || posy - 1 < 0) {
+                return false;
+            }
+            mapa[(posy-1) * colunas + posx] = 12;
+            return true;
+        }
+        if (ang == 4) {
+            if (colunas < posx + 2) {
+                posx = colunas - 2;
+            }
+            for (int l = 1; l < 4; l++) {
+                if (mapa[(posy - l +1) * colunas + posx + 1] != 0 || posy - l +1< 0) {
+                    return false;
+                }
+                mapa[(posy - l + 1) * colunas + posx + 1] = 12;
+            }
+            if (mapa[(posy- 3) * colunas + posx] != 0) {
+                return false;
+            }
+            mapa[(posy - 3) * colunas + posx] = 12;
+            return true;
+        }
+
+    }
+    if (p == 3) {
+        if (ang == 1) {
+            if (posx - 3 < -1) {
+                posx = 2;
+            }
+            if (mapa[(posy) * colunas + posx] != 0||posy - 1 < 0) {
+                return false;
+            }
+            mapa[(posy) * colunas + posx] = 13;
+            for (int l = 0; l < 3; l++) {
+                if (mapa[(posy-1) * colunas + posx - l] != 0 || posy - l +1 < 0) {
+                    return false;
+                }
+                mapa[(posy-1) * colunas + posx - l] = 13;
+            }
+            return true;
+        }
+        if (ang == 2) {
+            if (posx == 0) {
+                posx = 1;
+            }
+            if (mapa[(posy-2) * colunas + posx] != 0 || posy - 2 < 0) {
+                return false;
+            }
+            mapa[(posy-2) * colunas + posx] = 13;
+            for (int l = 1; l < 4; l++) {
+                if (mapa[(posy- l + 1) * colunas + posx - 1] != 0 || posy - l +1 < 0) {
+                    return false;
+                }
+                mapa[(posy- l +1) * colunas + posx - 1] = 13;
+            }
+            return true;
+        }
+        if (ang == 3) {
+            if (colunas < posx + 3) {
+                posx = colunas - 3;
+            }
+            if (mapa[(posy-1) * colunas + posx] != 0 || posy - 1 < 0) {
+                return false;
+            }
+            mapa[(posy-1) * colunas + posx] = 13;
+            for (int l = 0; l < 3; l++) {
+                if (mapa[(posy) * colunas + posx + l] != 0) {
+                    return false;
+                }
+                mapa[(posy) * colunas + posx + l] = 13;
+            }
+            return true;
+        }
+        if (ang == 4) {
+            if (posx == colunas - 1) {
+                posx = colunas - 2;
+            }
+            if (mapa[(posy) * colunas + posx] != 0) {
+                return false;
+            }
+            mapa[(posy) * colunas + posx] = 13;
+            for (int l = 0; l < 3; l++) {
+                if (mapa[(posy- l) * colunas + posx + 1] != 0 || posy - l < 0) {
+                    return false;
+                }
+                mapa[(posy- l) * colunas + posx + 1] = 13;
+            }
+            return true;
+        }
+    }
+    if (p == 4) {
+        if (colunas < posx + 2) {
+            posx = colunas - 2;
+        }
+        if (mapa[(posy) * colunas + posx + 1] != 0 || mapa[(posy) * colunas + posx] != 0) {
+            return false;
+        }
+        mapa[(posy) * colunas + posx + 1] = 14;
+        mapa[(posy) * colunas + posx] = 14;
+        if (mapa[(posy-1) * colunas + posx + 1] != 0 || mapa[(posy-1) * colunas + posx] != 0 || posy -  1 < 0) {
+            return false;
+        }
+        mapa[(posy-1) * colunas + posx + 1] = 14;
+        mapa[(posy-1) * colunas + posx] = 14;
+        return true;
+    }
+    if (p == 5) {
+        if (ang == 1 || ang == 3) {
+            if (colunas < posx + 3) {
+                posx = colunas - 3;
+            }
+            if (mapa[colunas * (posy) + posx] != 0 || mapa[colunas * (posy) + posx + 1] != 0) {
+                return false;
+            }
+            mapa[colunas * (posy) + posx] = 15;
+            mapa[colunas * (posy) + posx + 1] = 15;
+            if (mapa[colunas * (posy-1) + posx + 2] != 0 || mapa[colunas * (posy-1) + posx + 1] != 0 || posy - 1 < 0) {
+                return false;
+            }
+            mapa[colunas * (posy-1) + posx + 2] = 15;
+            mapa[colunas * (posy-1) + posx + 1] = 15;
+            return true;
+        }
+        if (ang == 2 || ang == 4) {
+            if (posx == 0) {
+                posx = 1;
+            }
+            if (mapa[colunas * (posy) + posx] != 0 || mapa[colunas * (posy - 1) + posx] != 0 || posy - 1 < 0) {
+                return false;
+            }
+            mapa[colunas * (posy) + posx] = 15;
+            mapa[colunas * (posy-1) + posx] = 15;
+            if (mapa[colunas * (posy-1) + posx - 1] != 0 || mapa[colunas * (posy-2) + posx - 1] != 0 || posy - 2 < 0) {
+                return false;
+            }
+            mapa[colunas * (posy- 2) + posx - 1] = 15;
+            mapa[colunas * (posy - 1) + posx - 1] = 15;
+            return true;
+        }
+    }
+    if (p == 6) {
+        if (ang == 1 || ang == 3) {
+            if (colunas < posx + 3) {
+                posx = colunas - 3;
+            }
+            if (mapa[colunas * (posy-1) + posx] != 0 || mapa[colunas * (posy-1) + posx + 1] != 0 || posy - 1 < 0) {
+                return false;
+            }
+            mapa[colunas * (posy-1) + posx] = 16;
+            mapa[colunas * (posy-1) + posx + 1] = 16;
+            if (mapa[colunas * (posy) + posx + 1] != 0 || mapa[colunas * (posy) + posx + 2] != 0) {
+                return false;
+            }
+            mapa[colunas * (posy) + posx + 1] = 16;
+            mapa[colunas * (posy) + posx + 2] = 16;
+            return true;
+        }
+        if (ang == 2 || ang == 4) {
+            if (posx == colunas - 1) {
+                posx = colunas - 2;
+            }
+            if (mapa[colunas * (posy) + posx] != 0 || mapa[colunas * (posy-1) + posx] != 0 || posy - 1 < 0) {
+                return false;
+            }
+            mapa[colunas * (posy) + posx] = 16;
+            mapa[colunas * (posy - 1) + posx] = 16;
+            if (mapa[colunas * (posy-1) + posx + 1] != 0 || mapa[colunas * (posy - 2) + posx + 1] != 0 || posy -2 < 0) {
+                return false;
+            }
+            mapa[colunas * (posy - 2) + posx + 1] = 16;
+            mapa[colunas * (posy - 1) + posx + 1] = 16;
+            return true;
+        }
+    }
+    if (p == 7) {
+        if (ang == 1) {
+            if (posx == 0) {
+                posx = 1;
+            }
+            if (posx == colunas - 1) {
+                posx = colunas - 2;
+            }
+            if (mapa[colunas * (posy) + posx] != 0 || mapa[colunas * (posy- 1) + posx] != 0 || posy - 1 < 0) {
+                return false;
+            }
+            mapa[colunas * (posy) + posx] = 17;
+            mapa[colunas * (posy-1) + posx] = 17;
+            if (mapa[colunas * (posy-1) + posx + 1] != 0 || mapa[colunas * (posy-1) + posx - 1] != 0) {
+                return false;
+            }
+            mapa[colunas * (posy-1) + posx + 1] = 17;
+            mapa[colunas * (posy-1) + posx - 1] = 17;
+            return true;
+        }
+        if (ang == 2) {
+            if (posx == 0) {
+                posx = 1;
+            }
+            if (mapa[colunas * (posy-1) + posx] != 0 || mapa[colunas * (posy-1) + posx - 1] != 0) {
+                return false;
+            }
+            mapa[colunas * (posy-1) + posx] = 17;
+            mapa[colunas * (posy-1) + posx - 1] = 17;
+            if (mapa[colunas * (posy) + posx - 1] != 0 || mapa[colunas * (posy-2) + posx - 1] != 0 || posy - 2 < 0) {
+                return false;
+            }
+            mapa[colunas * (posy) + posx - 1] = 17;
+            mapa[colunas * (posy-2) + posx - 1] = 17;
+            return true;
+        }
+        if (ang == 3) {
+            if (posx == 0) {
+                posx = 1;
+            }
+            if (posx == 9) {
+                posx = 8;
+            }
+            if (mapa[colunas * (posy) + posx] != 0 || mapa[colunas * (posy-1) + posx] != 0 || posy - 1 < 0) {
+                return false;
+            }
+            mapa[colunas * (posy) + posx] = 17;
+            mapa[colunas * (posy-1) + posx] = 17;
+            if (mapa[colunas * (posy) + posx + 1] != 0 || mapa[colunas * (posy) + posx - 1] != 0) {
+                return false;
+            }
+            mapa[colunas * (posy) + posx + 1] = 17;
+            mapa[colunas * (posy) + posx - 1] = 17;
+            return true;
+        }
+        if (ang == 4) {
+            if (posx == colunas - 1) {
+                posx = colunas - 2;
+            }
+            if (mapa[colunas * (posy-1) + posx] != 0 || mapa[colunas * (posy-1) + posx + 1] != 0 || posy - 1 < 0) {
+                return false;
+            }
+            mapa[colunas * (posy-1) + posx] = 17;
+            mapa[colunas * (posy-1) + posx + 1] = 17;
+            if (mapa[colunas * (posy) + posx - 1] != 0 || mapa[colunas * (posy-2) + posx - 1] != 0 || posy - 2 < 0) {
+                return false;
+            }
+            mapa[colunas * (posy) + posx + 1] = 17;
+            mapa[colunas * (posy-2) + posx + 1] = 17;
+            return true;
+        }
+    }
+    else { return false; }
+}
 int quantos_espaços_linha(int* mapa, int linha) {
     int c = 0;
     for (int x = 0; x < colunas; x++) {
