@@ -687,7 +687,7 @@ void inserir_auxiliar(int* aux, int p) {
 }
 int main()
 {
-    int * mapa = (int*)calloc(colunas * linhas, sizeof(int));
+   int * mapa = (int*)calloc(colunas * linhas, sizeof(int));
     int* auxiliar = (int*)calloc(4 * 2 * 4, sizeof(int));
     int* teste = create_fila();
     inserir_auxiliar(auxiliar, teste[0]);
@@ -697,70 +697,44 @@ int main()
     inserir_auxiliar(auxiliar, teste[2]);
     anda_auxiliar(auxiliar);
     inserir_auxiliar(auxiliar, teste[3]);
-    for (int i = 0; i < 4*4*2; i++) {
-        printf("%d ", auxiliar[i]);
-        if ((i + 1) % 8 == 0) {
-            printf("\n");
-        }
-    }
     int ang = rand() % 4 + 1;
     for (int x = 0; x < 4; x++) {
         printf("%d\n", teste[x]);
     }
+    int clock = 0;
+    clock++;
+    bool glwp = true;
+    bool ins = true;
     time_t timer1, timer2;
     time(&timer1);
-
-    /*while (inserir_peça(teste[0], ang, mapa)) {
-        posy = linhas -1;
-        printf("\n fila: ");
-        for (int i = 0; i < 4; i++) {
-            printf("%d ", teste[i]);
+    if ((clock % 1000 == 0 || glwp) && ins) {
+        if (anda_baixo(mapa)) {
+            posy = posy - 1;
         }
-
-
-        printf("mapa:  \n");
-        display_mapa(mapa);
-        bool k = false;
-        while (true) {
-            time(&timer2);
-            seconds = difftime(timer1, timer2);
-            if (((int)(seconds + 0.5) + 1) % 10 == 0) {
-           k = true;
-            time(&timer1);
-        }
-                if (anda_baixo(mapa) && k) {
-                    posy = posy - 1;
-                }
-                if (!anda_baixo(mapa) && k) {
-                    if (!(linha_cheia(mapa, posy)|| linha_cheia(mapa, posy +1)) || linha_cheia(mapa, posy +2) || linha_cheia(mapa, posy + 3) || linha_cheia(mapa, posy + -1) || linha_cheia(mapa, posy - 2) || linha_cheia(mapa, posy -3)){
-                        anda_fila(teste, 4);
-                        k = false;
-                        break;
+        else {
+            if (!(linha_cheia(mapa, posy) || linha_cheia(mapa, posy + 1)) || linha_cheia(mapa, posy + 2) || linha_cheia(mapa, posy + 3) || linha_cheia(mapa, posy + -1) || linha_cheia(mapa, posy - 2) || linha_cheia(mapa, posy - 3)) {
+                anda_fila(teste);
+                anda_auxiliar(auxiliar);
+                inserir_auxiliar(auxiliar, teste[3]);   
+            }
+            else {
+                int pont = 0;
+                for (int i = 0; i < linhas; i++) {
+                    if (linha_cheia(mapa, i)) {
+                        pont++;
+                        apaga_linha(mapa, i);
+                        pontuaçao(pont);
+                        i = 0;
                     }
-                    else {
-                        int pont = 0;
-                        for (int i = 0; i < linhas; i++) {
-                            if (linha_cheia(mapa, i)) {
-                                pont++;
-                                apaga_linha(mapa, i);
-                                pontuaçao(pont);
-                                i = 0;
-                            }
-                            anda_fila(teste, 4);
-                            ang = rand() % 4 + 1;
-                            k = false;
-                            break;
-                        }
-                    }
-                }
-
-            
-            //if glwpress_right anda_direita and if true posx = posx+1;
-            //if glwpress_left anda_esquerda and if true posx = posx-1;
+                    anda_fila(teste);
+                    anda_auxiliar(auxiliar);
+                    inserir_auxiliar(auxiliar, teste[3]);
+                    ang = rand() % 4 + 1;
+                    ins = inserir_peça(teste[0], ang, mapa);
+                    
+            }
         }
-    }*/
-    display_mapa(mapa);
-
+    }
     
     
     
