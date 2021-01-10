@@ -38,15 +38,18 @@ bool inserir_peça_r(int p, int ang, int* mapa) {//p representa qual das 7 peça
             if (colunas < posx + 3) {
                 posx = colunas - 3;
             }
-            if (mapa[(posy) * colunas + posx] != 0) {
+            if (mapa[(posy) * colunas + posx] != 0 && mapa[(posy)*colunas + posx] != 12) {
                 return false;
             }
-            mapa[(linhas - 1) * colunas + posx] = 12;
+            mapa[(posy) * colunas + posx] = 12;
+            if (posy - 1 < 0) {
+                return false;
+            }
             for (int l = 0; l < 3; l++) {
-                if (mapa[(posy - 1) * colunas + posx + l] != 0 || posy-1 < 0) {
+                if (mapa[(posy-1) * colunas + posx + l] != 0) {
                     return false;
                 }
-                mapa[(posy - 1) * colunas + posx + l] = 12;
+                mapa[(posy-1) * colunas + posx + l] = 12;
             }
         }
         if (ang == 2) {
@@ -56,9 +59,12 @@ bool inserir_peça_r(int p, int ang, int* mapa) {//p representa qual das 7 peça
             if (mapa[(posy) * colunas + posx] != 0 || mapa[(posy) * colunas + posx + 1] != 0) {
                 return false;
             }
+            if (posy - 1 < 0 || posy - 2 < 0) {
+                return false;
+            }
             mapa[(posy) * colunas + posx] = 12;
             mapa[(posy) * colunas + posx + 1] = 12;
-            if (mapa[(posy-1) * colunas + posx] != 0 || mapa[(posy-2) * colunas + posx] != 0 || posy - 2 < 0 || posy - 1 < 0) {
+            if ((mapa[(posy-1) * colunas + posx] != 0 && mapa[(posy-1) * colunas + posx] != 12) || (mapa[(posy-2) * colunas + posx] != 0 && mapa[(posy-2) * colunas + posx] != 12)) {
                 return false;
             }
             mapa[(posy-1) * colunas + posx] = 12;
@@ -70,12 +76,15 @@ bool inserir_peça_r(int p, int ang, int* mapa) {//p representa qual das 7 peça
                 posx = 2;
             }
             for (int l = 0; l < 3; l++) {
-                if (mapa[(posy) * colunas + posx - l] != 0) {
+                if (mapa[(posy) * colunas + posx - l] != 0 && mapa[(posy - 1) * colunas + posx] != 12) {
                     return false;
                 }
                 mapa[(posy) * colunas + posx - l] = 12;
             }
-            if (mapa[(posy-1) * colunas + posx] != 0 || posy - 1 < 0) {
+            if (posy - 1 < 0) {
+                return false;
+            }
+            if (mapa[(posy-1) * colunas + posx] != 0 && mapa[(posy - 1) * colunas + posx] != 12) {
                 return false;
             }
             mapa[(posy-1) * colunas + posx] = 12;
@@ -86,15 +95,18 @@ bool inserir_peça_r(int p, int ang, int* mapa) {//p representa qual das 7 peça
                 posx = colunas - 2;
             }
             for (int l = 1; l < 4; l++) {
-                if (mapa[(posy - l +1) * colunas + posx + 1] != 0 || posy - l +1< 0) {
+                if (mapa[(posy +1 - l) * colunas + posx + 1] != 0 || posy + 1 - l < 0) {
+                    printf("DSAadsdasadasd");
                     return false;
                 }
-                mapa[(posy - l + 1) * colunas + posx + 1] = 12;
+                mapa[(posy+1 - l) * colunas + posx + 1] = 12;
             }
-            if (mapa[(posy- 3) * colunas + posx] != 0) {
+            if (mapa[(posy-2) * colunas + posx] != 0 && mapa[(posy - 2) * colunas + posx] != 12) {
+                printf("Asdasd");
                 return false;
             }
-            mapa[(posy - 3) * colunas + posx] = 12;
+            mapa[(posy -2) * colunas + posx] = 12;
+            printf("Asassaa");
             return true;
         }
 
@@ -321,7 +333,9 @@ bool inserir_peça_r(int p, int ang, int* mapa) {//p representa qual das 7 peça
             return true;
         }
     }
-    else { return false; }
+    if (p < 1 || 7 < p) {
+        return false;
+    }
 }
 int quantos_espaços_linha(int* mapa, int linha) {
     int c = 0;
