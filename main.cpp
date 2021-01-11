@@ -2,7 +2,8 @@
 #include <map>
 #include <string>
 #include <ctime>
-
+#include <fstream>
+using namespace std;
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
@@ -1086,6 +1087,8 @@ bool rotacoes(int p, int* mapa, int ang, int lado) {
 	}
 	return true;
 }
+
+
 // settings
 int SCR_WIDTH = 800;
 int SCR_HEIGHT = 600;
@@ -1130,8 +1133,8 @@ GLfloat defsText8[3] = { 0.5f, 0.95, 0.6f };
 int btnSelected = -1;
 
 
-//classificaçoes
-std::string arraynome[] = { "","","","","" };
+
+
 
 //pages
 const int numpages = 4; //number of pages
@@ -1390,7 +1393,10 @@ int main()
 
 	ins = inserir_peca(teste[0], ang, mapa);
 	posy = 19;
-	
+
+	std::string arraynome[] = { " "," "," "," "," " };
+	int arraypontos[] = { -1,-1,-1,-1,-1 };
+
 	glm::mat4 model;
 	bool arrived[2] = { false,false };
 	while (!glfwWindowShouldClose(window))
@@ -1443,6 +1449,7 @@ int main()
 					ins = inserir_peca(teste[0], ang, mapa);
 					posy = 19;
 					fim = false;
+					score = 0;
 
 				}
 				transition = false;
@@ -1565,6 +1572,25 @@ int main()
 								posy = 19;
 								if (!ins) {
 									fim = true;
+									for (int i = 0;i < 5;i++) {
+										if (arraypontos[i] == -1) {
+											arraypontos[i] = score;
+											arraynome[i] = name;
+											break;
+										}
+										else {
+											if (arraypontos[i] < score) {
+												for (int j = 4;j > i;j--) {
+													arraypontos[j] = arraypontos[j-1];
+													arraynome[j] = arraynome[j-1];
+												}
+												arraypontos[i] = score;
+												arraynome[i] = name;
+												break;
+											}
+										}
+									}
+									
 								}
 
 							}
@@ -1702,20 +1728,36 @@ int main()
 			
 		}
 		else if (page == 3) {
+			
 			LetterShader.use();
 			LetterShader.setBool("isTransparency", true);
 			LetterShader.setBool("isTexture", true);
 			LetterShader.setMat4("model", model);
 			float * size;
 			size = RenderText(LetterShader, "Melhores Classificações", 0.5f, 0.1f, 0.4f, glm::vec3(1.0f, 1.0f, 1.0f));
-			//primeiro valor
-			size = RenderText(LetterShader, "12000", 0.5f, 0.2f, 0.4f, glm::vec3(1.0f, 1.0f, 1.0f));
+
 			//Fazer o loop para mostrar os 5 primeiros resultados
-			for (int i = 0; i < 4;i++) {
+			for (int j = 0;j < 5;j++) {
 				float x = size[1];
-				size = RenderText(LetterShader, "11000", 0.5f, SCR_HEIGHT - (x + 50.0f), 0.4f, glm::vec3(1.0f, 1.0f, 1.0f));
+				if (j == 0) {
+					if (arraypontos[j] == -1) {
+
+					}
+					else {
+						size = RenderText(LetterShader, arraynome[j], 0.40f, SCR_HEIGHT - (x + 100.0f), 0.4f, glm::vec3(1.0f, 1.0f, 1.0f));
+						size = RenderText(LetterShader, std::to_string(arraypontos[j]), 0.65f, SCR_HEIGHT - (x + 100.0f), 0.4f, glm::vec3(1.0f, 1.0f, 1.0f));
+					}
+				}
+				else {
+					if (arraypontos[j] == -1) {
+
+					}
+					else {
+						size = RenderText(LetterShader, arraynome[j], 0.40f, SCR_HEIGHT - (x + 70.0f), 0.4f, glm::vec3(1.0f, 1.0f, 1.0f));
+						size = RenderText(LetterShader, std::to_string(arraypontos[j]), 0.65f, SCR_HEIGHT - (x + 70.0f), 0.4f, glm::vec3(1.0f, 1.0f, 1.0f));
+					}
+				}
 			}
-			
 			size = RenderText(LetterShader, "Menu", 0.5f, 0.9f, 0.6f, colorText7);
 			sizeText7[0] = size[0]; sizeText7[1] = size[1]; sizeText7[2] = size[2]; sizeText7[3] = size[3];
 			
