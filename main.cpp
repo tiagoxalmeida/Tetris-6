@@ -1027,7 +1027,6 @@ int* create_fila() {
 	time(&timer);
 	seconds = difftime(timer, mktime(&y2k));
 	int y = (int)(seconds + 0.5);
-	printf("%d\n", y);
 	fila[0] = y % 10;
 	fila[1] = y / 100 % 10;
 	fila[2] = y / 1000 % 10 % 10;
@@ -1987,7 +1986,6 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 		}
 	}
 	else if (page == 4) {
-		printf("%f %f\n%f %f %f %f\n\n", xpos, ypos, sizeText8[0], sizeText8[1], sizeText8[2], sizeText8[3]);
 		if (xpos >= sizeText8[0] - SCR_POS_X && xpos <= sizeText8[2] - SCR_POS_X && ypos >= sizeText8[1] + SCR_POS_Y && ypos <= sizeText8[3] + SCR_POS_Y) {
 			glfwSetCursor(window, glfwCreateStandardCursor(GLFW_HAND_CURSOR));
 			btnSelected = 8;
