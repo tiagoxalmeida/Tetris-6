@@ -21,10 +21,80 @@ using namespace std;
 #include "stb_image.h"
 #include "shader_m.h"
 
+
+// settings
+int SCR_WIDTH = 800;
+int SCR_HEIGHT = 600;
+float SCR_POS_X = 0.0f;
+float SCR_POS_Y = 0.0f;
+float lastX = SCR_WIDTH / 2.0f;
+float lastY = SCR_HEIGHT / 2.0f;
+bool firstMouse = true;
+
+// timing
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
+
+// menu Text
+glm::vec3 colorText1 = glm::vec3(0.1f, 0.1f, 0.1f);
+GLfloat sizeText1[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+GLfloat defsText1[3] = { 0.5f, 0.4, 0.6f };
+glm::vec3 colorText2 = glm::vec3(0.1f, 0.1f, 0.1f);
+GLfloat sizeText2[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+GLfloat defsText2[3] = { 0.5f, 0.5f, 0.6f };
+glm::vec3 colorText3 = glm::vec3(0.1f, 0.1f, 0.1f);
+GLfloat sizeText3[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+GLfloat defsText3[3] = { 0.5f, 0.6, 0.6f };
+glm::vec3 colorText4 = glm::vec3(0.1f, 0.1f, 0.1f);
+GLfloat sizeText4[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+GLfloat defsText4[3] = { 0.5f, 0.7, 0.6f };
+glm::vec3 colorText5 = glm::vec3(0.1f, 0.1f, 0.1f);
+GLfloat sizeText5[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+GLfloat defsText5[3] = { 0.5f, 0.95, 0.6f };
+glm::vec3 colorText6 = glm::vec3(0.5f, 0.5f, 0.5f);
+GLfloat sizeText6[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+GLfloat defsText6[3] = { 0.495f, 0.6, 0.6f };
+glm::vec3 colorText7 = glm::vec3(0.1f, 0.1f, 0.1f);
+GLfloat sizeText7[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+GLfloat defsText7[3] = { 0.5f, 0.95, 0.6f };
+glm::vec3 colorText8 = glm::vec3(0.1f, 0.1f, 0.1f);
+GLfloat sizeText8[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+GLfloat defsText8[3] = { 0.5f, 0.95, 0.6f };
+
+//menu buttons
+int btnSelected = -1;
+
+//pages
+const int numpages = 4; //number of pages
+int lastpage = 1; //last page viewed
+int page = 1; //current page
+int nextpage = 1; //page to view next
+bool transition = false; //flag to see if in transition or not
+float tspeed = 0.025; //speed of the transition
+bool init = false;
+bool isNamed = false;
+bool fullscreen = false;
+
+//for scores
+std::string name = " ";
+
+//debug
+bool flag = true;
+
+/// Holds all state information relevant to a character as loaded using FreeType
+struct Character {
+	unsigned int TextureID; // ID handle of the glyph texture
+	glm::ivec2   Size;      // Size of glyph
+	glm::ivec2   Bearing;   // Offset from baseline to left/top of glyph
+	unsigned int Advance;   // Horizontal offset to advance to next glyph
+};
+
+std::map<GLchar, Character> Characters;
+unsigned int VAO, VBO;
+
 //colors
 glm::vec3 llGray = glm::vec3(0.863f, 0.863f, 0.863f);
 glm::vec3 dGray = glm::vec3(0.1f, 0.1f, 0.1f);
-
 
 //input
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -49,11 +119,13 @@ int* mapa = (int*)calloc(colunas * linhas, sizeof(int));
 bool ad = false;
 bool ae = false;
 bool baixo = false;
-float countdireita = 0.0;
-float countesquerda = 0.0;
-float speedx = 0.4;
+float countdireita = 0.0f;
+float countesquerda = 0.0f;
+float countbaixo = 0.0f;
+float speedx = 0.05f;
 
-void pontuaçao(int x) {
+
+void pontuacao(int x) {
 	if (x == 1) {
 		score = score + 80;
 	}
@@ -91,7 +163,6 @@ int quantos_espacos_linha(int* mapa, int linha) {
 	}
 	return c;
 }
-
 bool inserir_peca(int p, int ang, int* mapa) {//p representa qual das 7 peças será desenhada e o ang representa qual o angulo inicial da peça
 	if (p == 1) {
 		if (ang == 1 || ang == 3) { //assumi que o angulo 1 é o horizontal
@@ -1053,7 +1124,6 @@ void inserir_auxiliar(int* aux, int p) {
 		aux[14] = 7;
 	}
 }
-
 bool rotacoes(int p, int* mapa, int ang, int lado) {
 	int cima = 0;
 	int baixo = 0;
@@ -1087,83 +1157,6 @@ bool rotacoes(int p, int* mapa, int ang, int lado) {
 	}
 	return true;
 }
-
-
-// settings
-int SCR_WIDTH = 800;
-int SCR_HEIGHT = 600;
-float SCR_POS_X = 0.0f;
-float SCR_POS_Y = 0.0f;
-
-float lastX = SCR_WIDTH / 2.0f;
-float lastY = SCR_HEIGHT / 2.0f;
-bool firstMouse = true;
-
-// timing
-float deltaTime = 0.0f;
-float lastFrame = 0.0f;
-
-// menu Text
-glm::vec3 colorText1 = glm::vec3(0.1f, 0.1f, 0.1f);
-GLfloat sizeText1[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-GLfloat defsText1[3] = { 0.5f, 0.4, 0.6f };
-glm::vec3 colorText2 = glm::vec3(0.1f, 0.1f, 0.1f);
-GLfloat sizeText2[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-GLfloat defsText2[3] = { 0.5f, 0.5f, 0.6f };
-glm::vec3 colorText3 = glm::vec3(0.1f, 0.1f, 0.1f);
-GLfloat sizeText3[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-GLfloat defsText3[3] = { 0.5f, 0.6, 0.6f };
-glm::vec3 colorText4 = glm::vec3(0.1f, 0.1f, 0.1f);
-GLfloat sizeText4[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-GLfloat defsText4[3] = { 0.5f, 0.7, 0.6f };
-glm::vec3 colorText5 = glm::vec3(0.1f, 0.1f, 0.1f);
-GLfloat sizeText5[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-GLfloat defsText5[3] = { 0.5f, 0.95, 0.6f };
-glm::vec3 colorText6 = glm::vec3(0.5f, 0.5f, 0.5f);
-GLfloat sizeText6[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-GLfloat defsText6[3] = { 0.495f, 0.6, 0.6f };
-glm::vec3 colorText7 = glm::vec3(0.1f, 0.1f, 0.1f);
-GLfloat sizeText7[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-GLfloat defsText7[3] = { 0.5f, 0.95, 0.6f };
-glm::vec3 colorText8 = glm::vec3(0.1f, 0.1f, 0.1f);
-GLfloat sizeText8[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-GLfloat defsText8[3] = { 0.5f, 0.95, 0.6f };
-
-//menu buttons
-int btnSelected = -1;
-
-
-
-
-
-//pages
-const int numpages = 4; //number of pages
-int lastpage = 1; //last page viewed
-int page = 1; //current page
-int nextpage = 1; //page to view next
-bool transition = false; //flag to see if in transition or not
-float tspeed = 0.025; //speed of the transition
-bool init = false;
-bool isNamed = false;
-
-//for scores
-std::string name = " ";
-
-//debug
-bool flag = true;
-
-/// Holds all state information relevant to a character as loaded using FreeType
-struct Character {
-	unsigned int TextureID; // ID handle of the glyph texture
-	glm::ivec2   Size;      // Size of glyph
-	glm::ivec2   Bearing;   // Offset from baseline to left/top of glyph
-	unsigned int Advance;   // Horizontal offset to advance to next glyph
-};
-
-std::map<GLchar, Character> Characters;
-unsigned int VAO, VBO;
-
-
 void loadFont(std::string font_name) {
 	// FreeType
 	// --------
@@ -1239,7 +1232,6 @@ void loadFont(std::string font_name) {
 	FT_Done_Face(face);
 	FT_Done_FreeType(ft);
 }
-
 unsigned int loadPic(std::string pic_name) {
 	// load and create a texture 
 	// -------------------------
@@ -1271,7 +1263,6 @@ unsigned int loadPic(std::string pic_name) {
 	stbi_image_free(data);
 	return texture1;
 }
-
 void renderImage(Shader shader,unsigned int texture, glm::vec4 position, glm::vec3 color) {
 
 	glUniform3f(glGetUniformLocation(shader.ID, "textColor"), color.x, color.y, color.z);
@@ -1301,7 +1292,6 @@ void renderImage(Shader shader,unsigned int texture, glm::vec4 position, glm::ve
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 }
-
 int main()
 {
 	// glfw: initialize and configure
@@ -1317,7 +1307,7 @@ int main()
 
 	// glfw window creation
 	// --------------------
-	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Tetris 6 - TRUN", NULL, NULL);
 	glfwSetWindowSizeLimits(window, 600, 600, GLFW_DONT_CARE, GLFW_DONT_CARE);
 	if (window == NULL)
 	{
@@ -1354,7 +1344,8 @@ int main()
 	//loadFont("fonts/AmaticSC-Regular.ttf");
 	loadFont("fonts/Staatliches-Regular.ttf");
 	unsigned int keyboard = loadPic("media/keyboard.jpg");
-	unsigned int btnTex = loadPic("media/btnTex.png");
+	unsigned int blockTex = loadPic("media/block_texture.jpg");
+	unsigned int unblockTex = loadPic("media/unused_block_texture.jpg");
 
 	// configure VAO/VBO for texture quads
 	// -----------------------------------
@@ -1492,7 +1483,13 @@ int main()
 			size = RenderText(LetterShader, "Sair", defsText4[0], defsText4[1], defsText4[2], colorText4);
 			sizeText4[0] = size[0]; sizeText4[1] = size[1]; sizeText4[2] = size[2]; sizeText4[3] = size[3];
 
-			RenderText(LetterShader, "Pressiona a tecla f para entrares em ecrã cheio", 0.5f, 40.0f, 0.35f, glm::vec3(0.863f, 0.863f, 0.863f));
+			if (!fullscreen) {
+				RenderText(LetterShader, "Pressiona a tecla F para entrares em ecrã cheio", 0.5f, 40.0f, 0.35f, glm::vec3(0.863f, 0.863f, 0.863f));
+			}
+			else {
+				RenderText(LetterShader, "Pressiona a tecla ESC para saires do ecrã cheio", 0.5f, 40.0f, 0.35f, glm::vec3(0.863f, 0.863f, 0.863f));
+			}
+			
 			RenderText(LetterShader, "Made by Turn", 15.0f, 15.0f, 0.3f, glm::vec3(0.3, 0.7f, 0.9f));
 			LetterShader.setBool("isTexture", true);
 			LetterShader.setBool("isTransparency", false);
@@ -1557,7 +1554,7 @@ int main()
 						ae = false;
 					}
 					clock++;
-					if ((clock % 20 == 0 || baixo) && ins) {
+					if ((clock % 50 == 0 || baixo) && ins) {
 						if (anda_baixo(mapa)) {
 							posy = posy - 1;
 							baixo = false;
@@ -1600,7 +1597,7 @@ int main()
 									if (linha_cheia(mapa, i)) {
 										pont++;
 										apaga_linha(mapa, i);
-										pontuaçao(pont);
+										pontuacao(pont);
 
 										i = 0;
 									}
@@ -1631,31 +1628,34 @@ int main()
 					float auxy = 0.0;
 					int count = 0;
 					int aux = 0;
-
+					LetterShader.setBool("isTransparency", false);
 					for (int i = 0;i < (linhas * colunas);i++) {
+						LetterShader.setBool("isTexture", true);
+						
 						if (mapa[i] == 0) {
-							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(0.000, 0.545, 0.545));
+							//LetterShader.setBool("isTexture", false);
+							renderImage(LetterShader, unblockTex, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(0.845, 0.845, 0.845));
 						}
 						else if (mapa[i] == 1 || mapa[i] == 11) {
-							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(1.0f, 0.0f, 0.0f));
+							renderImage(LetterShader, blockTex, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(1.0f, 0.0f, 0.0f));
 						}
 						else if (mapa[i] == 2 || mapa[i] == 12) {
-							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(0.0f, 0.0f, 1.0f));
+							renderImage(LetterShader, blockTex, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(0.0f, 0.0f, 1.0f));
 						}
 						else if (mapa[i] == 3 || mapa[i] == 13) {
-							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(0.0f, 1.0f, 0.0f));
+							renderImage(LetterShader, blockTex, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(0.0f, 1.0f, 0.0f));
 						}
 						else if (mapa[i] == 4 || mapa[i] == 14) {
-							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(1.0f, 1.0f, 0.0f));
+							renderImage(LetterShader, blockTex, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(1.0f, 1.0f, 0.0f));
 						}
 						else if (mapa[i] == 5 || mapa[i] == 15) {
-							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(0.0f, 1.0f, 1.0f));
+							renderImage(LetterShader, blockTex, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(0.0f, 1.0f, 1.0f));
 						}
 						else if (mapa[i] == 6 || mapa[i] == 16) {
-							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(1.0f, 0.0f, 1.0f));
+							renderImage(LetterShader, blockTex, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(1.0f, 0.0f, 1.0f));
 						}
 						else if (mapa[i] == 7 || mapa[i] == 17) {
-							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(1.0f, 0.5f, 0.0f));
+							renderImage(LetterShader, blockTex, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.10 + auxx), static_cast<float>(SCR_HEIGHT * (0.2 + auxy)), SCR_POS_X + SCR_WIDTH * (0.10 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.2 + auxy + 0.03))), glm::vec3(1.0f, 0.5f, 0.0f));
 						}
 
 						if ((i - 9) % 10 == 0 && i != 0) {
@@ -1666,7 +1666,7 @@ int main()
 							auxx = auxx + 0.03;
 						}
 					}
-
+					LetterShader.setBool("isTexture", false);
 					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * 0.89, static_cast<float>(SCR_HEIGHT * 0.2), SCR_POS_X + SCR_WIDTH * 0.9, static_cast<float>(SCR_HEIGHT * 0.46)), glm::vec3(0.0f, 0.0f, 0.0f));
 					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * 0.54, static_cast<float>(SCR_HEIGHT * 0.185), SCR_POS_X + SCR_WIDTH * 0.9, static_cast<float>(SCR_HEIGHT * 0.20)), glm::vec3(0.0f, 0.0f, 0.0f));
 					renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * 0.54, static_cast<float>(SCR_HEIGHT * 0.2), SCR_POS_X + SCR_WIDTH * 0.55, static_cast<float>(SCR_HEIGHT * 0.46)), glm::vec3(0.0f, 0.0f, 0.0f));
@@ -1677,30 +1677,31 @@ int main()
 
 
 					for (int i = 2;i < 4 * 4 * 2;i++) {
-
+						LetterShader.setBool("isTexture", true);
 						if (auxiliar[i] == 0) {
-							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.6 + auxx), static_cast<float>(SCR_HEIGHT * (0.3 + auxy)), SCR_POS_X + SCR_WIDTH * (0.60 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.3 + auxy + 0.03))), glm::vec3(0.000, 0.545, 0.545));
+							LetterShader.setBool("isTexture", false);
+							renderImage(LetterShader, 0, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.6 + auxx), static_cast<float>(SCR_HEIGHT * (0.3 + auxy)), SCR_POS_X + SCR_WIDTH * (0.60 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.3 + auxy + 0.03))), glm::vec3(0.000, 0.545, 0.545));
 						}
 						else if (auxiliar[i] == 1 || auxiliar[i] == 11) {
-							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.6 + auxx), static_cast<float>(SCR_HEIGHT * (0.3 + auxy)), SCR_POS_X + SCR_WIDTH * (0.60 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.3 + auxy + 0.03))), glm::vec3(1.0f, 0.0f, 0.0f));
+							renderImage(LetterShader, blockTex, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.6 + auxx), static_cast<float>(SCR_HEIGHT * (0.3 + auxy)), SCR_POS_X + SCR_WIDTH * (0.60 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.3 + auxy + 0.03))), glm::vec3(1.0f, 0.0f, 0.0f));
 						}
 						else if (auxiliar[i] == 2 || auxiliar[i] == 12) {
-							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.6 + auxx), static_cast<float>(SCR_HEIGHT * (0.3 + auxy)), SCR_POS_X + SCR_WIDTH * (0.60 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.3 + auxy + 0.03))), glm::vec3(0.0f, 0.0f, 1.0f));
+							renderImage(LetterShader, blockTex, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.6 + auxx), static_cast<float>(SCR_HEIGHT * (0.3 + auxy)), SCR_POS_X + SCR_WIDTH * (0.60 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.3 + auxy + 0.03))), glm::vec3(0.0f, 0.0f, 1.0f));
 						}
 						else if (auxiliar[i] == 3 || auxiliar[i] == 13) {
-							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.6 + auxx), static_cast<float>(SCR_HEIGHT * (0.3 + auxy)), SCR_POS_X + SCR_WIDTH * (0.60 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.3 + auxy + 0.03))), glm::vec3(0.0f, 1.0f, 0.0f));
+							renderImage(LetterShader, blockTex, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.6 + auxx), static_cast<float>(SCR_HEIGHT * (0.3 + auxy)), SCR_POS_X + SCR_WIDTH * (0.60 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.3 + auxy + 0.03))), glm::vec3(0.0f, 1.0f, 0.0f));
 						}
 						else if (auxiliar[i] == 4 || auxiliar[i] == 14) {
-							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.6 + auxx), static_cast<float>(SCR_HEIGHT * (0.3 + auxy)), SCR_POS_X + SCR_WIDTH * (0.60 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.3 + auxy + 0.03))), glm::vec3(1.0f, 1.0f, 0.0f));
+							renderImage(LetterShader, blockTex, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.6 + auxx), static_cast<float>(SCR_HEIGHT * (0.3 + auxy)), SCR_POS_X + SCR_WIDTH * (0.60 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.3 + auxy + 0.03))), glm::vec3(1.0f, 1.0f, 0.0f));
 						}
 						else if (auxiliar[i] == 5 || auxiliar[i] == 15) {
-							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.6 + auxx), static_cast<float>(SCR_HEIGHT * (0.3 + auxy)), SCR_POS_X + SCR_WIDTH * (0.60 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.3 + auxy + 0.03))), glm::vec3(0.0f, 1.0f, 1.0f));
+							renderImage(LetterShader, blockTex, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.6 + auxx), static_cast<float>(SCR_HEIGHT * (0.3 + auxy)), SCR_POS_X + SCR_WIDTH * (0.60 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.3 + auxy + 0.03))), glm::vec3(0.0f, 1.0f, 1.0f));
 						}
 						else if (auxiliar[i] == 6 || auxiliar[i] == 16) {
-							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.6 + auxx), static_cast<float>(SCR_HEIGHT * (0.3 + auxy)), SCR_POS_X + SCR_WIDTH * (0.60 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.3 + auxy + 0.03))), glm::vec3(1.0f, 0.0f, 1.0f));
+							renderImage(LetterShader, blockTex, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.6 + auxx), static_cast<float>(SCR_HEIGHT * (0.3 + auxy)), SCR_POS_X + SCR_WIDTH * (0.60 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.3 + auxy + 0.03))), glm::vec3(1.0f, 0.0f, 1.0f));
 						}
 						else if (auxiliar[i] == 7 || auxiliar[i] == 17) {
-							renderImage(LetterShader, keyboard, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.6 + auxx), static_cast<float>(SCR_HEIGHT * (0.3 + auxy)), SCR_POS_X + SCR_WIDTH * (0.60 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.3 + auxy + 0.03))), glm::vec3(1.0f, 0.5f, 0.0f));
+							renderImage(LetterShader, blockTex, glm::vec4(SCR_POS_X + SCR_WIDTH * (0.6 + auxx), static_cast<float>(SCR_HEIGHT * (0.3 + auxy)), SCR_POS_X + SCR_WIDTH * (0.60 + auxx + 0.03), static_cast<float>(SCR_HEIGHT * (0.3 + auxy + 0.03))), glm::vec3(1.0f, 0.5f, 0.0f));
 						}
 						if ((i - 7) % 8 == 0 && i != 0) {
 							auxy = auxy + 0.03;
@@ -1721,6 +1722,7 @@ int main()
 				}
 			}
 			LetterShader.setBool("isTexture", true);
+			LetterShader.setBool("isTransparency", true);
 			float* size;
 			size = RenderText(LetterShader, "Menu", defsText5[0], defsText5[1], defsText5[2], colorText5);
 			sizeText5[0] = size[0]; sizeText5[1] = size[1]; sizeText5[2] = size[2]; sizeText5[3] = size[3];
@@ -1794,11 +1796,18 @@ int main()
 	return 0;
 }
 
-// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-// ---------------------------------------------------------------------------------------------------------
+// glfw: whenever a key is clicked
+// ---------------------------------------------------------------------------------------------
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-
+	if (key == GLFW_KEY_F && action == GLFW_PRESS) {
+		glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), 0, 0, SCR_WIDTH, SCR_HEIGHT, 60);
+		fullscreen = true;
+	}
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+		glfwSetWindowMonitor(window, NULL, 10, 10, SCR_WIDTH, SCR_HEIGHT, 0);
+		fullscreen = false;
+	}
 	if (page != 2) {
 		if ((key == GLFW_KEY_UP || key == GLFW_KEY_W) && action == GLFW_PRESS)
 			btnSelected -= 1;
@@ -1840,28 +1849,21 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 				anda_direita(mapa);
 				countdireita = 0;
 			}
-			if ((key == GLFW_KEY_A || key == GLFW_KEY_LEFT) &&  action == GLFW_REPEAT) {
-				countesquerda += speedx;
-				if (countesquerda >= 1) {
-					anda_esquerda(mapa);
-					countesquerda = 0;
-				}
-				
-
-			}
-			if ((key == GLFW_KEY_D || key == GLFW_KEY_RIGHT) &&  action == GLFW_REPEAT) {
-				countdireita += speedx;
-				if (countdireita >= 1) {
-					anda_direita(mapa);
-					countdireita = 0;
+			if (fim) {
+				if ((key == GLFW_KEY_ENTER && action == GLFW_PRESS)) {
+					btnSelected = 5;
+					mouse_button_callback(window, GLFW_MOUSE_BUTTON_LEFT, GLFW_PRESS, 0);
 				}
 			}
+			
+			
 		}
 
 	}
 	
 }
-
+// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
+// ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow *window)
 {
 	if (page == 1 && btnSelected != -1) {
@@ -1874,7 +1876,25 @@ void processInput(GLFWwindow *window)
 	if (page == 2) {
 		if (isNamed) {
 			if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-				baixo = true;
+				countbaixo += speedx;
+				if (countbaixo >= 1) {
+					baixo = true;
+					countbaixo = 0;
+				}
+			}
+			if ((glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)) {
+				countesquerda += speedx;
+				if (countesquerda >= 1) {
+					anda_esquerda(mapa);
+					countesquerda = 0;
+				}
+			}
+			if ((glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)) {
+				countdireita += speedx;
+				if (countdireita >= 1) {
+					anda_direita(mapa);
+					countdireita = 0;
+				}
 			}
 		}
 	}
@@ -1912,7 +1932,6 @@ void processInput(GLFWwindow *window)
 		colorText8 = glm::vec3(0.1f, 0.1f, 0.1f);
 
 }
-
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -1923,7 +1942,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	SCR_HEIGHT = height;
 	SCR_WIDTH = width;
 }
-
 // glfw: whenever the mouse moves, this callback is called
 // -------------------------------------------------------
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
@@ -1977,6 +1995,8 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	}
 	
 }
+// glfw: whenever the mouse is clicked, this callback is called
+// ----------------------------------------------------------------------
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
@@ -2023,7 +2043,6 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 		}
 			
 }
-
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 // ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
@@ -2037,8 +2056,6 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	}
 
 }
-
-
 // render line of text
 // -------------------
 float * RenderText(Shader &shader, std::string text, float x, float y, float scale, glm::vec3 color)
